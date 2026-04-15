@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zagent.local/contracts/artifacts.schema.json",
+  "title": "ZAgent Runtime Artifacts",
+  "type": "object",
+  "properties": {
+    "state": { "type": "string", "const": "state.json" },
+    "chat": { "type": "string", "const": "chat.jsonl" },
+    "events": { "type": "string", "const": "events.jsonl" },
+    "tools": { "type": "string", "const": "tools.jsonl" },
+    "result": { "type": "string", "const": "result.json" },
+    "summary": { "type": "string", "const": "summary.md" }
+  },
+  "additionalProperties": false
+}
+

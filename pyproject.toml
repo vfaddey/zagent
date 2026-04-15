@@ -1,0 +1,63 @@
+[project]
+name = "zagent-workspace"
+version = "0.1.0"
+description = "Workspace for ZAgent runtime and launcher packages."
+readme = "README.md"
+authors = [
+    { name = "vfaddey", email = "vfaddey@yandex.ru" },
+]
+requires-python = ">=3.12,<3.14"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = [
+    "packages/runtime",
+    "packages/launcher",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "types-PyYAML>=6.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+    "examples/workspaces",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "packages/runtime/tests",
+    "packages/launcher/tests",
+    "tests",
+]
+pythonpath = [
+    "packages/runtime/src",
+    "packages/launcher/src",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = [
+    "zagent_runtime",
+    "zagent_launcher",
+]

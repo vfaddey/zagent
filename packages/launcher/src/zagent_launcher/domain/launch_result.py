@@ -1,0 +1,2 @@
+"""Launch result domain model."""
+

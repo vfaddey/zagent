@@ -1,0 +1,2 @@
+"""Container specification domain model."""
+

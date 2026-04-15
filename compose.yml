@@ -1,0 +1,15 @@
+services:
+  runtime:
+    build:
+      context: .
+      dockerfile: docker/runtime.Dockerfile
+    image: zagent-runtime:local
+    working_dir: /workspace
+    environment:
+      OLLAMA_API_KEY: ${OLLAMA_API_KEY:-ollama}
+    volumes:
+      - ./examples/workspaces/fastapi-app:/workspace
+    command:
+      - run
+      - --run-spec
+      - /workspace/run.yaml

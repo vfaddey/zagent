@@ -1,0 +1,19 @@
+"""Runtime observability port."""
+
+from __future__ import annotations
+
+from typing import Protocol
+
+from zagent_runtime.application.runtime_context import RuntimePaths
+from zagent_runtime.domain.observability import ChatMessage, RunEvent
+from zagent_runtime.domain.run import RunState
+from zagent_runtime.domain.tools import ToolEvent
+
+
+class RunObserverPort(Protocol):
+    def on_run_started(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None: ...
+    def on_message(self, paths: RuntimePaths, message: ChatMessage) -> None: ...
+    def on_tool_started(self, paths: RuntimePaths, event: ToolEvent) -> None: ...
+    def on_tool_finished(self, paths: RuntimePaths, event: ToolEvent) -> None: ...
+    def on_phase_changed(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None: ...
+    def on_run_finished(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None: ...

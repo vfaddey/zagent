@@ -1,0 +1,2 @@
+"""Launcher YAML loader."""
+

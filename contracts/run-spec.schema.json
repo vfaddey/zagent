@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zagent.local/contracts/run-spec.schema.json",
+  "title": "ZAgent Run Spec",
+  "type": "object",
+  "required": ["run_id", "mode", "task", "model", "agent_env", "runtime", "tools", "policy"],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "mode": { "type": "string", "enum": ["fix", "research", "task"] },
+    "task": { "type": "object" },
+    "model": { "type": "object" },
+    "agent_env": { "type": "object" },
+    "runtime": { "type": "object" },
+    "tools": { "type": "object" },
+    "policy": { "type": "object" }
+  },
+  "additionalProperties": false
+}
+

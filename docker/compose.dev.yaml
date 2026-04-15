@@ -1,0 +1,12 @@
+services:
+  runtime:
+    build:
+      context: ..
+      dockerfile: docker/runtime.Dockerfile
+    image: zagent-runtime:local
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace
+    env_file:
+      - ../.env
+

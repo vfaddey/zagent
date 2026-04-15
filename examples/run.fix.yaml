@@ -1,0 +1,38 @@
+run_id: fix-example
+mode: fix
+
+task:
+  title: Fix example issue
+  description: >
+    Inspect the workspace and produce a small, reviewable fix.
+  workspace: /workspace
+
+model:
+  provider: openai_compatible
+  model: gpt-5
+  api_base: https://api.openai.com/v1
+  api_key_env: OPENAI_API_KEY
+
+agent_env:
+  path: /workspace/.agent
+
+runtime:
+  image: zagent-runtime:local
+  workdir: /workspace
+  max_turns: 20
+  final_marker: ZAGENT_DONE
+
+tools:
+  builtin:
+    - shell
+    - files
+    - git
+    - apply_patch
+  custom: []
+  enable_mcp: true
+
+policy:
+  network: restricted
+  git_push: false
+  writable_paths:
+    - /workspace

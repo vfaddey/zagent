@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zagent.local/contracts/agent-env.schema.json",
+  "title": "ZAgent Agent Environment",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "prompts": { "type": "object" },
+    "rules": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "mcp": { "type": "object" },
+    "files": { "type": "object" }
+  },
+  "additionalProperties": false
+}
+

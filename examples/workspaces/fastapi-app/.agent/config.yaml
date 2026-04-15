@@ -1,0 +1,19 @@
+name: python-dev-env
+
+prompts:
+  system: prompts/system.md
+  task: prompts/task.md
+
+rules:
+  - rules/global.md
+  - rules/repo.md
+
+skills:
+  - skills/python.md
+
+mcp:
+  servers_file: mcp/servers.yaml
+
+files:
+  extra_context:
+    - files/extra_context.md

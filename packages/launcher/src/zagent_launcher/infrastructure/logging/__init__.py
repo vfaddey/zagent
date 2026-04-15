@@ -1,0 +1,2 @@
+"""Launcher logging setup."""
+
