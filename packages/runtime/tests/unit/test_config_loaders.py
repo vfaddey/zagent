@@ -17,6 +17,7 @@ from zagent_runtime.infrastructure.config.loaders import (
     YamlRunSpecLoader,
 )
 
+
 def test_load_run_spec_from_file(tmp_path: Path) -> None:
     path = tmp_path / "run.yaml"
     path.write_text(
