@@ -7,7 +7,7 @@ from typing import Annotated
 
 import typer
 
-from zagent_runtime.application.bootstrap import BootstrapRun
+from zagent_runtime.application.use_cases.bootstrap import BootstrapRun
 from zagent_runtime.infrastructure.di.container import RuntimeContainerFactory
 
 app = typer.Typer(help="Run ZAgent inside a runtime container.")

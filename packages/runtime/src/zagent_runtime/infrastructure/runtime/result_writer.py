@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
 from zagent_runtime.domain.run import RunResult
 from zagent_runtime.infrastructure.observability.json_serializer import JsonRecordSerializer
 from zagent_runtime.infrastructure.observability.redactor import SecretRedactor

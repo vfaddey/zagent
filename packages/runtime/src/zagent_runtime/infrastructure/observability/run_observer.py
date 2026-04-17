@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from zagent_runtime.application.runtime_context import RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.domain.observability import ChatMessage, RunEvent
 from zagent_runtime.domain.run import RunState
 from zagent_runtime.domain.tools import ToolEvent

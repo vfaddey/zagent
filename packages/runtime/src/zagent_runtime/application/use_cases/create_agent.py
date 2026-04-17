@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from zagent_runtime.application.prompt_context import PromptContext
-from zagent_runtime.application.register_tools import RegisteredTools, RegisterTools
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.prompt_context import PromptContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
+from zagent_runtime.application.use_cases.register_tools import RegisteredTools, RegisterTools
 
 
 class PromptBuilder(Protocol):

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from zagent_runtime.application.runtime_context import RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.domain.observability import ChatMessage
 from zagent_runtime.infrastructure.observability.jsonl_writer import JsonlWriter
 

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from zagent_runtime.application.build_prompt_context import BuildPromptContext
-from zagent_runtime.application.prompt_context import PromptContext
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.prompt_context import PromptContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
+from zagent_runtime.application.use_cases.build_prompt_context import BuildPromptContext
 
 
 class RuntimePromptBuilder:

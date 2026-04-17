@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from autogen.tools import Tool
-from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
 from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
 from zagent_runtime.domain.mcp import McpServerSpec, McpTransport
 from zagent_runtime.domain.model import ModelProvider, ModelSpec

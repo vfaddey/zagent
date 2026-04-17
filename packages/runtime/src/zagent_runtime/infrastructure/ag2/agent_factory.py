@@ -8,8 +8,8 @@ from typing import Any
 
 from autogen import ConversableAgent, LLMConfig, register_function  # type: ignore[import-untyped]
 
-from zagent_runtime.application.prompt_context import PromptContext
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.prompt_context import PromptContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.tool_adapter import Ag2FunctionTool, Ag2RuntimeToolAdapter
 from zagent_runtime.infrastructure.mcp.adapters import Ag2McpToolAdapter

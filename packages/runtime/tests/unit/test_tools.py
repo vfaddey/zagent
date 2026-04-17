@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from zagent_runtime.application.register_tools import RegisterTools
+from zagent_runtime.application.use_cases.register_tools import RegisterTools
 from zagent_runtime.domain.agent_env import AgentEnvRef
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.policy import PolicySpec

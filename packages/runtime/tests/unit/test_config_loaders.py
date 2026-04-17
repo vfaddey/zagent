@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from zagent_runtime.application.load_agent_env import LoadAgentEnv
-from zagent_runtime.application.load_run_spec import LoadRunSpec
+from zagent_runtime.application.use_cases.load_agent_env import LoadAgentEnv
+from zagent_runtime.application.use_cases.load_run_spec import LoadRunSpec
 from zagent_runtime.domain.model import ModelProvider
 from zagent_runtime.domain.run import RunMode
 from zagent_runtime.infrastructure.config.errors import (

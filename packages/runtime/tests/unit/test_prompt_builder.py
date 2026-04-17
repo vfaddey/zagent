@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from zagent_runtime.application.build_prompt_context import BuildPromptContext
-from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.use_cases.build_prompt_context import BuildPromptContext
 from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.policy import PolicySpec

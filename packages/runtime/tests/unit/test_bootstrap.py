@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from zagent_runtime.application.bootstrap import BootstrapRun
+from zagent_runtime.application.use_cases.bootstrap import BootstrapRun
 from zagent_runtime.domain.run import ResultStatus
 from zagent_runtime.infrastructure.di.container import RuntimeContainerFactory
 

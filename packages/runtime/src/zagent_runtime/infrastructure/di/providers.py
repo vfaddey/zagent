@@ -4,20 +4,27 @@ from __future__ import annotations
 
 from dishka import Provider, Scope, provide
 
-from zagent_runtime.application.bootstrap import BootstrapRun
-from zagent_runtime.application.build_prompt_context import BuildPromptContext, PromptDocumentLoader
-from zagent_runtime.application.build_runtime_context import (
+from zagent_runtime.application.ports.observe_run import RunObserverPort
+from zagent_runtime.application.ports.register_mcp import McpServerLoader
+from zagent_runtime.application.use_cases.bootstrap import BootstrapRun
+from zagent_runtime.application.use_cases.build_prompt_context import (
+    BuildPromptContext,
+    PromptDocumentLoader,
+)
+from zagent_runtime.application.use_cases.build_runtime_context import (
     BuildRuntimeContext,
     RuntimePathResolver,
 )
-from zagent_runtime.application.collect_result import CollectResult, RunResultWriter
-from zagent_runtime.application.create_agent import AgentFactory, CreateAgent, PromptBuilder
-from zagent_runtime.application.execute_task import AgentBackendRunner, ExecuteTask
-from zagent_runtime.application.load_agent_env import AgentEnvLoader, LoadAgentEnv
-from zagent_runtime.application.load_run_spec import LoadRunSpec, RunSpecLoader
-from zagent_runtime.application.observe_run import RunObserverPort
-from zagent_runtime.application.register_mcp import McpServerLoader
-from zagent_runtime.application.register_tools import RegisterTools, RuntimeToolRegistry
+from zagent_runtime.application.use_cases.collect_result import CollectResult, RunResultWriter
+from zagent_runtime.application.use_cases.create_agent import (
+    AgentFactory,
+    CreateAgent,
+    PromptBuilder,
+)
+from zagent_runtime.application.use_cases.execute_task import AgentBackendRunner, ExecuteTask
+from zagent_runtime.application.use_cases.load_agent_env import AgentEnvLoader, LoadAgentEnv
+from zagent_runtime.application.use_cases.load_run_spec import LoadRunSpec, RunSpecLoader
+from zagent_runtime.application.use_cases.register_tools import RegisterTools, RuntimeToolRegistry
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentFactory
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.run_executor import Ag2RunExecutor

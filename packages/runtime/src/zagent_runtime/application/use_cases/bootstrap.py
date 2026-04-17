@@ -6,12 +6,12 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 
-from zagent_runtime.application.build_runtime_context import BuildRuntimeContext
-from zagent_runtime.application.collect_result import CollectResult
-from zagent_runtime.application.create_agent import CreateAgent
-from zagent_runtime.application.execute_task import ExecuteTask
-from zagent_runtime.application.observe_run import RunObserverPort
-from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.ports.observe_run import RunObserverPort
+from zagent_runtime.application.use_cases.build_runtime_context import BuildRuntimeContext
+from zagent_runtime.application.use_cases.collect_result import CollectResult
+from zagent_runtime.application.use_cases.create_agent import CreateAgent
+from zagent_runtime.application.use_cases.execute_task import ExecuteTask
 from zagent_runtime.domain.observability import ChatMessage, ChatRole, RunEvent
 from zagent_runtime.domain.run import ResultStatus, RunPhase, RunResult, RunState, RunStatus
 

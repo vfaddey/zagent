@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zagent_runtime.application.build_runtime_context import BuildRuntimeContext
+from zagent_runtime.application.use_cases.build_runtime_context import BuildRuntimeContext
 from zagent_runtime.infrastructure.config.loaders import DirectoryAgentEnvLoader, YamlRunSpecLoader
 from zagent_runtime.infrastructure.config.path_resolver import DefaultRuntimePathResolver
 

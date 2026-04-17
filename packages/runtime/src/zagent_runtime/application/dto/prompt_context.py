@@ -1,5 +1,3 @@
-"""Prompt context assembled for agent creation."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass

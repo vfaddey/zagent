@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
 from zagent_runtime.domain.run import RunResult
 
 

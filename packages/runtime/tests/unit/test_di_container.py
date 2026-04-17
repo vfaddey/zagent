@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from zagent_runtime.application.bootstrap import BootstrapRun
-from zagent_runtime.application.build_prompt_context import BuildPromptContext
-from zagent_runtime.application.build_runtime_context import BuildRuntimeContext
-from zagent_runtime.application.collect_result import CollectResult, RunResultWriter
-from zagent_runtime.application.create_agent import CreateAgent
-from zagent_runtime.application.execute_task import ExecuteTask
-from zagent_runtime.application.load_agent_env import LoadAgentEnv
-from zagent_runtime.application.load_run_spec import LoadRunSpec
-from zagent_runtime.application.observe_run import RunObserverPort
-from zagent_runtime.application.register_tools import RegisterTools
+from zagent_runtime.application.ports.observe_run import RunObserverPort
+from zagent_runtime.application.use_cases.bootstrap import BootstrapRun
+from zagent_runtime.application.use_cases.build_prompt_context import BuildPromptContext
+from zagent_runtime.application.use_cases.build_runtime_context import BuildRuntimeContext
+from zagent_runtime.application.use_cases.collect_result import CollectResult, RunResultWriter
+from zagent_runtime.application.use_cases.create_agent import CreateAgent
+from zagent_runtime.application.use_cases.execute_task import ExecuteTask
+from zagent_runtime.application.use_cases.load_agent_env import LoadAgentEnv
+from zagent_runtime.application.use_cases.load_run_spec import LoadRunSpec
+from zagent_runtime.application.use_cases.register_tools import RegisterTools
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentFactory
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.run_executor import Ag2RunExecutor

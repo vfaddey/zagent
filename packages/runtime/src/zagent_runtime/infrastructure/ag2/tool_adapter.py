@@ -8,8 +8,8 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from zagent_runtime.application.observe_run import RunObserverPort
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
+from zagent_runtime.application.ports.observe_run import RunObserverPort
 from zagent_runtime.domain.tools import ToolCallStatus, ToolEvent
 from zagent_runtime.infrastructure.tools.base import ToolBackend, ToolExecutionResult
 from zagent_runtime.infrastructure.tools.builtin.files import FilesTool

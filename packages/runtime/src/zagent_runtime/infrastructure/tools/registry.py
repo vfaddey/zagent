@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from zagent_runtime.application.register_tools import RegisteredTools
+from zagent_runtime.application.use_cases.register_tools import RegisteredTools
 from zagent_runtime.domain.tools import ToolSpec
 from zagent_runtime.infrastructure.tools.base import ToolBackend, ToolDefinition
 from zagent_runtime.infrastructure.tools.builtin.catalog import BuiltinToolCatalog

@@ -7,9 +7,9 @@ from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from pathlib import Path
 
-from zagent_runtime.application.create_agent import AgentSession
-from zagent_runtime.application.observe_run import RunObserverPort
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
+from zagent_runtime.application.ports.observe_run import RunObserverPort
+from zagent_runtime.application.use_cases.create_agent import AgentSession
 from zagent_runtime.domain.observability import RunEvent
 from zagent_runtime.domain.run import ResultStatus, RunResult
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentBundle

@@ -17,7 +17,7 @@ from autogen.mcp.mcp_client import (  # type: ignore[import-untyped]
 from mcp.client.session import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
 from zagent_runtime.domain.mcp import McpServerSpec, McpTransport
 from zagent_runtime.infrastructure.mcp.server_spec import resolve_env_mapping
 

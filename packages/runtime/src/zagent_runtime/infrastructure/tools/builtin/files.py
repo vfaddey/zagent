@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
 from zagent_runtime.infrastructure.security.policies import FileSystemPolicy
 from zagent_runtime.infrastructure.tools.base import ToolExecutionResult
 

@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from zagent_runtime.application.create_agent import CreateAgent
-from zagent_runtime.application.prompt_context import PromptContext
-from zagent_runtime.application.register_tools import RegisterTools
-from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.prompt_context import PromptContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.use_cases.create_agent import CreateAgent
+from zagent_runtime.application.use_cases.register_tools import RegisterTools
 from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.policy import PolicySpec

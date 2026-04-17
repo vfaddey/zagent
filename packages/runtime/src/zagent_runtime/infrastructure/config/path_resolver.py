@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from zagent_runtime.application.runtime_context import RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.domain.run import RunSpec
 
 

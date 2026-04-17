@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from zagent_runtime.application.runtime_context import RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.domain.run import RunState
 from zagent_runtime.infrastructure.observability.json_serializer import JsonRecordSerializer
 from zagent_runtime.infrastructure.observability.redactor import SecretRedactor

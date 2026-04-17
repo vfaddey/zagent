@@ -5,9 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Protocol
 
-from zagent_runtime.application.load_agent_env import AgentEnvLoader
-from zagent_runtime.application.load_run_spec import RunSpecLoader
-from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.use_cases.load_agent_env import AgentEnvLoader
+from zagent_runtime.application.use_cases.load_run_spec import RunSpecLoader
 from zagent_runtime.domain.run import RunSpec
 
 

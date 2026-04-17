@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from zagent_runtime.application.prompt_context import PromptContext
-from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.prompt_context import PromptContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
 from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.observability import ChatMessage, RunEvent

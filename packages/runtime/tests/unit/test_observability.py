@@ -4,7 +4,7 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-from zagent_runtime.application.runtime_context import RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.domain.observability import ChatMessage, ChatRole, RunEvent
 from zagent_runtime.domain.run import RunPhase, RunState, RunStatus
 from zagent_runtime.domain.tools import ToolCallStatus, ToolEvent

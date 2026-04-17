@@ -10,9 +10,9 @@ from typing import Any
 
 from autogen.tools import Tool  # type: ignore[import-untyped]
 
-from zagent_runtime.application.observe_run import RunObserverPort
-from zagent_runtime.application.register_mcp import McpServerLoader
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
+from zagent_runtime.application.ports.observe_run import RunObserverPort
+from zagent_runtime.application.ports.register_mcp import McpServerLoader
 from zagent_runtime.domain.mcp import McpServerSpec
 from zagent_runtime.domain.observability import RunEvent
 from zagent_runtime.domain.tools import ToolCallStatus, ToolEvent

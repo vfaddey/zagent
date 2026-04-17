@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from zagent_runtime.application.runtime_context import RuntimeContext
+from zagent_runtime.application.dto.runtime_context import RuntimeContext
 from zagent_runtime.domain.model import ModelProvider
 from zagent_runtime.infrastructure.tools.base import ToolBackend
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry

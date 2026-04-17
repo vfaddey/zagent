@@ -3,17 +3,45 @@
   "$id": "https://zagent.local/contracts/run-spec.schema.json",
   "title": "ZAgent Run Spec",
   "type": "object",
-  "required": ["run_id", "mode", "task", "model", "agent_env", "runtime", "tools", "policy"],
+  "required": ["run_id", "mode", "task", "model", "runtime", "tools", "policy"],
   "properties": {
     "run_id": { "type": "string", "minLength": 1 },
     "mode": { "type": "string", "enum": ["fix", "research", "task"] },
-    "task": { "type": "object" },
+    "task": {
+      "type": "object",
+      "required": ["title", "workspace"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "workspace": { "type": "string", "minLength": 1 },
+        "prompt": { "type": "string", "minLength": 1 },
+        "prompt_file": { "type": "string", "minLength": 1 }
+      },
+      "oneOf": [
+        { "required": ["prompt"], "not": { "required": ["prompt_file"] } },
+        { "required": ["prompt_file"], "not": { "required": ["prompt"] } }
+      ],
+      "additionalProperties": false
+    },
     "model": { "type": "object" },
-    "agent_env": { "type": "object" },
-    "runtime": { "type": "object" },
+    "agent_env": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "default": ".zagent" }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["image", "workdir"],
+      "properties": {
+        "image": { "type": "string", "minLength": 1 },
+        "workdir": { "type": "string", "minLength": 1 },
+        "max_turns": { "type": "integer", "minimum": 1, "maximum": 100 }
+      },
+      "additionalProperties": false
+    },
     "tools": { "type": "object" },
     "policy": { "type": "object" }
   },
   "additionalProperties": false
 }
-
