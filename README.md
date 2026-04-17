@@ -1,6 +1,6 @@
 # ZAgent
 
-[![CI](https://github.com/faddey/zagent/actions/workflows/ci.yml/badge.svg)](https://github.com/faddey/zagent/actions/workflows/ci.yml)
+[![CI](https://github.com/vfaddey/zagent/actions/workflows/ci.yml/badge.svg)](https://github.com/vfaddey/zagent/actions/workflows/ci.yml)
 
 ZAgent — это CLI (launcher) для запуска AI-агентов в изолированном Docker-контейнере (runtime).
 
