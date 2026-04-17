@@ -75,15 +75,6 @@ class BuiltinToolCatalog:
             ),
             ToolDefinition(
                 spec=ToolSpec(
-                    name="git",
-                    kind=ToolKind.BUILTIN,
-                    description="Run git operations through runtime-controlled tooling.",
-                ),
-                backend=ToolBackend.RUNTIME_NATIVE,
-                backend_name="git",
-            ),
-            ToolDefinition(
-                spec=ToolSpec(
                     name="files",
                     kind=ToolKind.BUILTIN,
                     description="Read and write files through runtime-controlled tooling.",

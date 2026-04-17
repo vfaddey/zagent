@@ -27,7 +27,7 @@ def test_builtin_catalog_maps_runtime_names_to_ag2_native_names() -> None:
 def test_builtin_catalog_keeps_runtime_native_tools_out_of_ag2_list() -> None:
     catalog = BuiltinToolCatalog()
 
-    assert catalog.ag2_native_names(("git", "files", "shell")) == ()
+    assert catalog.ag2_native_names(("files", "shell")) == ()
 
 
 def test_builtin_catalog_rejects_unknown_tool() -> None:
@@ -37,12 +37,12 @@ def test_builtin_catalog_rejects_unknown_tool() -> None:
 
 def test_register_tools_use_case_registers_enabled_builtin_specs() -> None:
     registry = ToolRegistry(BuiltinToolCatalog())
-    registered = RegisterTools(registry)(_run_spec_with_tools(("shell", "patch", "git")))
+    registered = RegisterTools(registry)(_run_spec_with_tools(("shell", "patch", "files")))
 
-    assert [spec.name for spec in registered.specs] == ["shell", "apply_patch", "git"]
+    assert [spec.name for spec in registered.specs] == ["shell", "apply_patch", "files"]
     assert all(spec.kind is ToolKind.BUILTIN for spec in registered.specs)
     assert registry.backend_names(ToolBackend.AG2_NATIVE) == ("apply_patch",)
-    assert registry.backend_names(ToolBackend.RUNTIME_NATIVE) == ("shell", "git")
+    assert registry.backend_names(ToolBackend.RUNTIME_NATIVE) == ("shell", "files")
 
 
 def test_tool_registry_rejects_duplicate_registration() -> None:
@@ -59,15 +59,15 @@ def _run_spec_with_tools(names: tuple[str, ...]) -> RunSpec:
         mode=RunMode.FIX,
         task=TaskSpec(
             title="Fix",
-            description="Fix",
             workspace="/workspace",
+            prompt="Fix",
         ),
         model=ModelSpec(
             provider=ModelProvider.OPENAI_COMPATIBLE,
             model="gpt-5",
             api_key_env="OPENAI_API_KEY",
         ),
-        agent_env=AgentEnvRef(path="/workspace/.agent"),
+        agent_env=AgentEnvRef(path="/workspace/.zagent"),
         runtime=RuntimeSpec(image="zagent-runtime:local", workdir="/workspace"),
         tools=ToolsConfig(builtin=names),
         policy=PolicySpec(),

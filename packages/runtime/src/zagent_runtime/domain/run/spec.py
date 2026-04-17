@@ -10,6 +10,8 @@ from zagent_runtime.domain.model.spec import ModelSpec
 from zagent_runtime.domain.policy.spec import PolicySpec
 from zagent_runtime.domain.task.spec import TaskSpec
 
+FINAL_MARKER = "ZAGENT_DONE"
+
 
 class RunMode(StrEnum):
     """Supported runtime execution modes."""
@@ -26,7 +28,10 @@ class RuntimeSpec:
     image: str
     workdir: str
     max_turns: int = 20
-    final_marker: str = "ZAGENT_DONE"
+
+    @property
+    def final_marker(self) -> str:
+        return FINAL_MARKER
 
 
 @dataclass(frozen=True, slots=True)

@@ -12,6 +12,8 @@ from zagent_runtime.application.prompt_context import PromptContext
 from zagent_runtime.application.runtime_context import RuntimeContext
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.tool_adapter import Ag2FunctionTool, Ag2RuntimeToolAdapter
+from zagent_runtime.infrastructure.mcp.adapters import Ag2McpToolAdapter
+from zagent_runtime.infrastructure.mcp.client_factory import Ag2McpToolkitHandle
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry
 
 
@@ -21,6 +23,7 @@ class Ag2AgentBundle:
     executor: ConversableAgent
     llm_config: LLMConfig
     runtime_tools: tuple[Ag2FunctionTool, ...]
+    mcp_toolkits: tuple[Ag2McpToolkitHandle, ...]
 
 
 class Ag2AgentFactory:
@@ -30,10 +33,12 @@ class Ag2AgentFactory:
         self,
         model_config_builder: Ag2ModelConfigBuilder,
         runtime_tool_adapter: Ag2RuntimeToolAdapter,
+        mcp_tool_adapter: Ag2McpToolAdapter,
         tool_registry: ToolRegistry,
     ) -> None:
         self._model_config_builder = model_config_builder
         self._runtime_tool_adapter = runtime_tool_adapter
+        self._mcp_tool_adapter = mcp_tool_adapter
         self._tool_registry = tool_registry
 
     def create(
@@ -65,12 +70,18 @@ class Ag2AgentFactory:
             executor=executor,
             runtime_tools=runtime_tools,
         )
+        mcp_toolkits = self._mcp_tool_adapter.register(
+            context=context,
+            assistant=assistant,
+            executor=executor,
+        )
 
         return Ag2AgentBundle(
             assistant=assistant,
             executor=executor,
             llm_config=llm_config,
             runtime_tools=runtime_tools,
+            mcp_toolkits=mcp_toolkits,
         )
 
     def _register_runtime_tools(

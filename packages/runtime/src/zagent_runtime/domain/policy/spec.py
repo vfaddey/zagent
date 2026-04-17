@@ -21,4 +21,3 @@ class PolicySpec:
     network: NetworkPolicy = NetworkPolicy.RESTRICTED
     git_push: bool = False
     writable_paths: tuple[str, ...] = field(default_factory=tuple)
-

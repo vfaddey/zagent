@@ -1,2 +1,1 @@
 """MCP capability registry."""
-

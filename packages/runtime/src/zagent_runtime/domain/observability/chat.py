@@ -23,4 +23,3 @@ class ChatMessage:
     ts: datetime
     role: ChatRole
     content: str
-

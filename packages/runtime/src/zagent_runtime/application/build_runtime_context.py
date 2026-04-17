@@ -29,7 +29,7 @@ class BuildRuntimeContext:
     def __call__(self, run_spec_file: Path) -> RuntimeContext:
         run_spec = self._run_spec_loader.load(run_spec_file)
         paths = self._path_resolver.resolve(run_spec_file, run_spec)
-        agent_env = self._agent_env_loader.load(paths.agent_env_config_file)
+        agent_env = self._agent_env_loader.load(paths.agent_env_dir)
 
         return RuntimeContext(
             run_spec=run_spec,

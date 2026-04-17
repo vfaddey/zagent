@@ -21,7 +21,9 @@ class DryRunAgentFactory:
 
 
 class DryRunExecutor:
-    def run(self, context: RuntimeContext, session: AgentSession) -> RunResult:
+    def run(
+        self, context: RuntimeContext, session: AgentSession, continue_msg: str | None = None
+    ) -> RunResult:
         final_message = (
             "Dry run completed. Runtime configuration, prompt building, and tool "
             f"registration succeeded.\n\n{context.run_spec.runtime.final_marker}"

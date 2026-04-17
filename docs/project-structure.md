@@ -10,3 +10,4 @@ reads artifacts from the mounted workspace.
 
 The two packages communicate through file contracts under `contracts/`.
 
+Launcher architecture and roadmap are documented in `docs/launcher.md`.

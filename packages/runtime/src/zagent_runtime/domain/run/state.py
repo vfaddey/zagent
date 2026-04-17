@@ -40,4 +40,3 @@ class RunState:
     last_message_index: int | None = None
     last_tool_call: str | None = None
     artifacts: tuple[str, ...] = field(default_factory=tuple)
-

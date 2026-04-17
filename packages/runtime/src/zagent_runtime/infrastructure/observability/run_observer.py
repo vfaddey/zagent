@@ -29,6 +29,9 @@ class RunObserver:
         self._state_store.save(paths, state)
         self._event_writer.write(paths, event)
 
+    def on_event(self, paths: RuntimePaths, event: RunEvent) -> None:
+        self._event_writer.write(paths, event)
+
     def on_message(self, paths: RuntimePaths, message: ChatMessage) -> None:
         self._chat_writer.write(paths, message)
 

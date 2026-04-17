@@ -1,2 +1,1 @@
 """Run artifact path resolver."""
-

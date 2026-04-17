@@ -13,7 +13,6 @@ from zagent_runtime.application.runtime_context import RuntimeContext
 from zagent_runtime.domain.tools import ToolCallStatus, ToolEvent
 from zagent_runtime.infrastructure.tools.base import ToolBackend, ToolExecutionResult
 from zagent_runtime.infrastructure.tools.builtin.files import FilesTool
-from zagent_runtime.infrastructure.tools.builtin.git import GitTool
 from zagent_runtime.infrastructure.tools.builtin.shell import ShellTool
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry
 
@@ -32,12 +31,10 @@ class Ag2RuntimeToolAdapter:
     def __init__(
         self,
         files_tool: FilesTool,
-        git_tool: GitTool,
         shell_tool: ShellTool,
         observer: RunObserverPort,
     ) -> None:
         self._files_tool = files_tool
-        self._git_tool = git_tool
         self._shell_tool = shell_tool
         self._observer = observer
 
@@ -55,14 +52,6 @@ class Ag2RuntimeToolAdapter:
                     self._files_read_text(context),
                     self._files_write_text(context),
                     self._files_list_dir(context),
-                )
-            )
-
-        if "git" in runtime_native_names:
-            tools.extend(
-                (
-                    self._git_status(context),
-                    self._git_diff(context),
                 )
             )
 
@@ -124,38 +113,6 @@ class Ag2RuntimeToolAdapter:
             name="files_list_dir",
             description="List a directory inside the workspace.",
             function=files_list_dir,
-        )
-
-    def _git_status(self, context: RuntimeContext) -> Ag2FunctionTool:
-        def git_status() -> str:
-            """Return short git status for the workspace."""
-            return self._execute(
-                context=context,
-                tool="git_status",
-                args={},
-                call=lambda: self._git_tool.status(context),
-            )
-
-        return Ag2FunctionTool(
-            name="git_status",
-            description="Return short git status for the workspace.",
-            function=git_status,
-        )
-
-    def _git_diff(self, context: RuntimeContext) -> Ag2FunctionTool:
-        def git_diff(staged: bool = False) -> str:
-            """Return git diff for the workspace."""
-            return self._execute(
-                context=context,
-                tool="git_diff",
-                args={"staged": staged},
-                call=lambda: self._git_tool.diff(context, staged=staged),
-            )
-
-        return Ag2FunctionTool(
-            name="git_diff",
-            description="Return git diff for the workspace.",
-            function=git_diff,
         )
 
     def _shell_run(self, context: RuntimeContext) -> Ag2FunctionTool:
@@ -239,10 +196,7 @@ class Ag2RuntimeToolAdapter:
         return json.dumps(asdict(result), ensure_ascii=False)
 
     def _trace_args(self, args: dict[str, Any]) -> dict[str, Any]:
-        return {
-            key: self._trace_value(value)
-            for key, value in args.items()
-        }
+        return {key: self._trace_value(value) for key, value in args.items()}
 
     def _trace_value(self, value: Any, max_chars: int = 2_000) -> Any:
         if isinstance(value, str):

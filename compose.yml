@@ -12,4 +12,4 @@ services:
     command:
       - run
       - --run-spec
-      - /workspace/run.yaml
+      - /workspace/.zagent/run.yaml

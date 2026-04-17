@@ -1,0 +1,32 @@
+run_id: default
+mode: task
+
+task:
+  title: Fastapi test app
+  prompt_file: prompts/task.md
+  workspace: /workspace
+
+model:
+  provider: openai_compatible
+  model: google/gemini-3-flash-preview
+  api_base: https://openrouter.ai/api/v1
+  api_key_env: OPENAI_API_KEY
+  timeout_seconds: 300
+
+runtime:
+  image: zagent-runtime:local
+  workdir: /workspace
+  max_turns: 40
+
+tools:
+  builtin:
+    - shell
+    - files
+  custom: []
+  enable_mcp: false
+
+policy:
+  network: restricted
+  git_push: false
+  writable_paths:
+    - /workspace

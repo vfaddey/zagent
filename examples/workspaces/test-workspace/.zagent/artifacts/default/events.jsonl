@@ -1,0 +1,4 @@
+{"event": "run_started", "payload": {"run_id": "default"}, "ts": "2026-04-17T18:19:21.742568Z"}
+{"event": "task_started", "payload": {}, "ts": "2026-04-17T18:19:21.794437Z"}
+{"event": "result_collecting", "payload": {}, "ts": "2026-04-17T18:19:49.391581Z"}
+{"event": "run_finished", "payload": {"status": "success"}, "ts": "2026-04-17T18:19:49.395145Z"}

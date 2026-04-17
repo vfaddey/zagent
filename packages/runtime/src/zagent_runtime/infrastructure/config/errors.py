@@ -17,6 +17,14 @@ class ConfigFileNotFoundError(ConfigError):
         self.path = path
 
 
+class ConfigDirectoryNotFoundError(ConfigError):
+    """Raised when a configuration directory does not exist."""
+
+    def __init__(self, path: Path) -> None:
+        super().__init__(f"Configuration directory not found: {path}")
+        self.path = path
+
+
 class ConfigParseError(ConfigError):
     """Raised when a configuration file cannot be parsed."""
 
@@ -24,4 +32,3 @@ class ConfigParseError(ConfigError):
         super().__init__(f"Invalid configuration file {path}: {reason}")
         self.path = path
         self.reason = reason
-

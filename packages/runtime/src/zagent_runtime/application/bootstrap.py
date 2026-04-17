@@ -37,18 +37,24 @@ class BootstrapRun:
         self._collect_result = collect_result
         self._observer = observer
 
-    def __call__(self, run_spec_file: Path) -> BootstrapResult:
+    def __call__(self, run_spec_file: Path, continue_msg: str | None = None) -> BootstrapResult:
         context = self._build_runtime_context(run_spec_file)
         started_at = self._now()
         self._start_run(context.paths, context.run_spec.run_id, started_at)
 
         try:
             session = self._create_agent(context)
-            self._write_initial_messages(
-                context.paths,
-                session.prompt.system_message,
-                session.prompt.task_message,
-            )
+            if continue_msg is None:
+                self._write_initial_messages(
+                    context.paths,
+                    session.prompt.system_message,
+                    session.prompt.task_message,
+                )
+            else:
+                self._observer.on_message(
+                    context.paths,
+                    ChatMessage(ts=self._now(), role=ChatRole.USER, content=continue_msg),
+                )
             self._change_phase(
                 paths=context.paths,
                 run_id=context.run_spec.run_id,
@@ -57,7 +63,7 @@ class BootstrapRun:
                 event="task_started",
             )
 
-            result = self._execute_task(context, session)
+            result = self._execute_task(context, session, continue_msg)
             result = self._complete_result(result)
             self._observer.on_message(
                 context.paths,

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 class PromptDocumentRef:
     title: str
     path: str
+    description: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,4 +18,3 @@ class PromptContext:
     task_message: str
     rules: tuple[PromptDocumentRef, ...]
     skills: tuple[PromptDocumentRef, ...]
-

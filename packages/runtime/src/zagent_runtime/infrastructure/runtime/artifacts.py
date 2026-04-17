@@ -1,2 +1,1 @@
 """Runtime artifact path infrastructure."""
-

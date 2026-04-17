@@ -14,7 +14,6 @@ class AgentEnvRef:
 class PromptFiles:
     system: str | None = None
     developer: str | None = None
-    task: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,4 +26,3 @@ class AgentEnv:
     skills: tuple[str, ...] = field(default_factory=tuple)
     mcp_servers_file: str | None = None
     extra_context_files: tuple[str, ...] = field(default_factory=tuple)
-

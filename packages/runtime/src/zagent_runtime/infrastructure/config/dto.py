@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
+from zagent_runtime.domain.agent_env import AgentEnvRef
+from zagent_runtime.domain.mcp import McpServersConfig, McpServerSpec, McpTransport
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.policy import NetworkPolicy, PolicySpec
 from zagent_runtime.domain.run import RunMode, RunSpec, RuntimeSpec, ToolsConfig
@@ -16,15 +17,24 @@ class StrictConfigModel(BaseModel):
 
 
 class TaskConfig(StrictConfigModel):
-    title: str
-    description: str
-    workspace: str
+    title: str = Field(min_length=1)
+    workspace: str = Field(min_length=1)
+    prompt: str | None = Field(default=None, min_length=1)
+    prompt_file: str | None = Field(default=None, min_length=1)
+
+    @model_validator(mode="after")
+    def validate_prompt_source(self) -> TaskConfig:
+        prompt_sources = (self.prompt is not None, self.prompt_file is not None)
+        if prompt_sources.count(True) != 1:
+            raise ValueError("task requires exactly one of prompt or prompt_file")
+        return self
 
     def to_domain(self) -> TaskSpec:
         return TaskSpec(
             title=self.title,
-            description=self.description,
             workspace=self.workspace,
+            prompt=self.prompt,
+            prompt_file=self.prompt_file,
         )
 
 
@@ -33,6 +43,8 @@ class ModelConfig(StrictConfigModel):
     model: str
     api_key_env: str
     api_base: str | None = None
+    timeout_seconds: float | None = Field(default=None, gt=0)
+    reasoning_effort: str | None = None
 
     def to_domain(self) -> ModelSpec:
         return ModelSpec(
@@ -40,11 +52,13 @@ class ModelConfig(StrictConfigModel):
             model=self.model,
             api_key_env=self.api_key_env,
             api_base=self.api_base,
+            timeout_seconds=self.timeout_seconds,
+            reasoning_effort=self.reasoning_effort,
         )
 
 
 class AgentEnvRefConfig(StrictConfigModel):
-    path: str
+    path: str = ".zagent"
 
     def to_domain(self) -> AgentEnvRef:
         return AgentEnvRef(path=self.path)
@@ -54,14 +68,12 @@ class RuntimeConfig(StrictConfigModel):
     image: str
     workdir: str
     max_turns: int = Field(default=20, ge=1, le=100)
-    final_marker: str = "ZAGENT_DONE"
 
     def to_domain(self) -> RuntimeSpec:
         return RuntimeSpec(
             image=self.image,
             workdir=self.workdir,
             max_turns=self.max_turns,
-            final_marker=self.final_marker,
         )
 
 
@@ -96,7 +108,7 @@ class RunSpecConfig(StrictConfigModel):
     mode: RunMode
     task: TaskConfig
     model: ModelConfig
-    agent_env: AgentEnvRefConfig
+    agent_env: AgentEnvRefConfig = Field(default_factory=AgentEnvRefConfig)
     runtime: RuntimeConfig
     tools: ToolsConfigDto
     policy: PolicyConfig
@@ -114,41 +126,62 @@ class RunSpecConfig(StrictConfigModel):
         )
 
 
-class PromptFilesConfig(StrictConfigModel):
-    system: str | None = None
-    developer: str | None = None
-    task: str | None = None
+class McpServerConfig(StrictConfigModel):
+    name: str
+    transport: McpTransport
+    enabled: bool = True
+    command: str | None = None
+    args: list[str] = Field(default_factory=list)
+    url: str | None = None
+    environment: dict[str, str] = Field(default_factory=dict)
+    environment_env: dict[str, str] = Field(default_factory=dict)
+    working_dir: str | None = None
+    headers: dict[str, str] = Field(default_factory=dict)
+    headers_env: dict[str, str] = Field(default_factory=dict)
+    timeout_seconds: float | None = Field(default=None, gt=0)
+    read_timeout_seconds: float | None = Field(default=None, gt=0)
+    use_tools: bool = True
+    use_resources: bool = False
 
-    def to_domain(self) -> PromptFiles:
-        return PromptFiles(
-            system=self.system,
-            developer=self.developer,
-            task=self.task,
+    @field_validator("transport", mode="before")
+    @classmethod
+    def normalize_transport(cls, value: object) -> object:
+        if isinstance(value, str):
+            return value.replace("-", "_")
+        return value
+
+    @model_validator(mode="after")
+    def validate_transport_fields(self) -> McpServerConfig:
+        if self.transport is McpTransport.STDIO and not self.command:
+            raise ValueError("stdio MCP server requires command")
+        if self.transport in {McpTransport.SSE, McpTransport.STREAMABLE_HTTP} and not self.url:
+            raise ValueError(f"{self.transport.value} MCP server requires url")
+        return self
+
+    def to_domain(self) -> McpServerSpec:
+        return McpServerSpec(
+            name=self.name,
+            transport=self.transport,
+            enabled=self.enabled,
+            command=self.command,
+            args=tuple(self.args),
+            url=self.url,
+            environment=self.environment,
+            environment_env=self.environment_env,
+            working_dir=self.working_dir,
+            headers=self.headers,
+            headers_env=self.headers_env,
+            timeout_seconds=self.timeout_seconds,
+            read_timeout_seconds=self.read_timeout_seconds,
+            use_tools=self.use_tools,
+            use_resources=self.use_resources,
         )
 
 
-class McpConfig(StrictConfigModel):
-    servers_file: str | None = None
+class McpServersConfigDto(StrictConfigModel):
+    servers: list[McpServerConfig] = Field(default_factory=list)
 
-
-class ExtraFilesConfig(StrictConfigModel):
-    extra_context: list[str] = Field(default_factory=list)
-
-
-class AgentEnvConfig(StrictConfigModel):
-    name: str
-    prompts: PromptFilesConfig = Field(default_factory=PromptFilesConfig)
-    rules: list[str] = Field(default_factory=list)
-    skills: list[str] = Field(default_factory=list)
-    mcp: McpConfig = Field(default_factory=McpConfig)
-    files: ExtraFilesConfig = Field(default_factory=ExtraFilesConfig)
-
-    def to_domain(self) -> AgentEnv:
-        return AgentEnv(
-            name=self.name,
-            prompts=self.prompts.to_domain(),
-            rules=tuple(self.rules),
-            skills=tuple(self.skills),
-            mcp_servers_file=self.mcp.servers_file,
-            extra_context_files=tuple(self.files.extra_context),
+    def to_domain(self) -> McpServersConfig:
+        return McpServersConfig(
+            servers=tuple(server.to_domain() for server in self.servers),
         )

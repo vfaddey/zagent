@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -13,7 +12,6 @@ from zagent_runtime.domain.task import TaskSpec
 from zagent_runtime.infrastructure.security.errors import PolicyViolationError
 from zagent_runtime.infrastructure.security.policies import FileSystemPolicy
 from zagent_runtime.infrastructure.tools.builtin.files import FilesTool
-from zagent_runtime.infrastructure.tools.builtin.git import GitTool
 from zagent_runtime.infrastructure.tools.builtin.shell import ShellTool
 
 
@@ -41,28 +39,6 @@ def test_files_tool_blocks_writes_outside_writable_roots(tmp_path: Path) -> None
         tool.write_text(context, str(tmp_path.parent / "outside.txt"), "blocked")
 
 
-def test_git_tool_status_and_diff(tmp_path: Path) -> None:
-    _git(tmp_path, "init")
-    _git(tmp_path, "config", "user.email", "test@example.com")
-    _git(tmp_path, "config", "user.name", "Test")
-    (tmp_path / "README.md").write_text("initial\n", encoding="utf-8")
-    _git(tmp_path, "add", "README.md")
-    _git(tmp_path, "commit", "-m", "Initial")
-    (tmp_path / "README.md").write_text("changed\n", encoding="utf-8")
-
-    context = _context(tmp_path)
-    tool = GitTool()
-
-    status = tool.status(context)
-    diff = tool.diff(context)
-
-    assert status.ok
-    assert "M README.md" in status.output
-    assert diff.ok
-    assert "-initial" in diff.output
-    assert "+changed" in diff.output
-
-
 def test_shell_tool_runs_command_in_workspace(tmp_path: Path) -> None:
     context = _context(tmp_path)
     tool = ShellTool()
@@ -75,7 +51,7 @@ def test_shell_tool_runs_command_in_workspace(tmp_path: Path) -> None:
 
 
 def _context(workspace: Path) -> RuntimeContext:
-    agent_env_dir = workspace / ".agent"
+    agent_env_dir = workspace / ".zagent"
     run_dir = agent_env_dir / "artifacts" / "run-1"
     return RuntimeContext(
         run_spec=RunSpec(
@@ -83,8 +59,8 @@ def _context(workspace: Path) -> RuntimeContext:
             mode=RunMode.FIX,
             task=TaskSpec(
                 title="Fix",
-                description="Fix",
                 workspace=str(workspace),
+                prompt="Fix",
             ),
             model=ModelSpec(
                 provider=ModelProvider.OPENAI_COMPATIBLE,
@@ -93,7 +69,7 @@ def _context(workspace: Path) -> RuntimeContext:
             ),
             agent_env=AgentEnvRef(path=str(agent_env_dir)),
             runtime=RuntimeSpec(image="zagent-runtime:local", workdir=str(workspace)),
-            tools=ToolsConfig(builtin=("files", "git")),
+            tools=ToolsConfig(builtin=("files", "shell")),
             policy=PolicySpec(writable_paths=(str(workspace),)),
         ),
         agent_env=AgentEnv(
@@ -104,23 +80,14 @@ def _context(workspace: Path) -> RuntimeContext:
             run_spec_file=workspace / "run.yaml",
             workspace=workspace,
             agent_env_dir=agent_env_dir,
-            agent_env_config_file=agent_env_dir / "config.yaml",
             artifacts_root_dir=agent_env_dir / "artifacts",
             run_artifacts_dir=run_dir,
             state_file=run_dir / "state.json",
             chat_file=run_dir / "chat.jsonl",
+            ag2_history_file=run_dir / "ag2_history.json",
             events_file=run_dir / "events.jsonl",
             tools_file=run_dir / "tools.jsonl",
             result_file=run_dir / "result.json",
             summary_file=run_dir / "summary.md",
         ),
-    )
-
-
-def _git(workspace: Path, *args: str) -> None:
-    subprocess.run(
-        ("git", "-C", str(workspace), *args),
-        check=True,
-        capture_output=True,
-        encoding="utf-8",
     )

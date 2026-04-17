@@ -14,4 +14,3 @@ class RunEvent:
     ts: datetime
     event: str
     payload: dict[str, Any] = field(default_factory=dict)
-

@@ -27,7 +27,6 @@ class DefaultRuntimePathResolver:
             value=run_spec.agent_env.path,
         )
 
-        agent_env_config_file = agent_env_dir / "config.yaml"
         artifacts_root_dir = agent_env_dir / "artifacts"
         run_artifacts_dir = artifacts_root_dir / run_spec.run_id
 
@@ -35,11 +34,11 @@ class DefaultRuntimePathResolver:
             run_spec_file=normalized_run_spec_file,
             workspace=workspace,
             agent_env_dir=agent_env_dir,
-            agent_env_config_file=agent_env_config_file,
             artifacts_root_dir=artifacts_root_dir,
             run_artifacts_dir=run_artifacts_dir,
             state_file=run_artifacts_dir / "state.json",
             chat_file=run_artifacts_dir / "chat.jsonl",
+            ag2_history_file=run_artifacts_dir / "ag2_history.json",
             events_file=run_artifacts_dir / "events.jsonl",
             tools_file=run_artifacts_dir / "tools.jsonl",
             result_file=run_artifacts_dir / "result.json",

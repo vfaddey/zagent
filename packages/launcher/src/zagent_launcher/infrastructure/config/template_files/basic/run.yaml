@@ -1,0 +1,32 @@
+run_id: default
+mode: task
+
+task:
+  title: Describe the task
+  prompt_file: prompts/task.md
+  workspace: /workspace
+
+model:
+  provider: openai_compatible
+  model: gpt-5-mini
+  api_key_env: OPENAI_API_KEY
+  timeout_seconds: 60
+  reasoning_effort: medium
+
+runtime:
+  image: zagent-runtime:local
+  workdir: /workspace
+  max_turns: 40
+
+tools:
+  builtin:
+    - shell
+    - files
+  custom: []
+  enable_mcp: false
+
+policy:
+  network: restricted
+  git_push: false
+  writable_paths:
+    - /workspace

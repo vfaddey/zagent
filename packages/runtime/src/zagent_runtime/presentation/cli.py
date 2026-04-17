@@ -39,12 +39,20 @@ def run(
             help="Build context and artifacts without calling the LLM backend.",
         ),
     ] = False,
+    continue_msg: Annotated[
+        str | None,
+        typer.Option(
+            "--continue",
+            "-c",
+            help="Continue previous run with a new message.",
+        ),
+    ] = None,
 ) -> None:
     container_factory = RuntimeContainerFactory()
     container = container_factory.create_dry_run() if dry_run else container_factory.create()
 
     try:
-        result = container.get(BootstrapRun)(run_spec)
+        result = container.get(BootstrapRun)(run_spec, continue_msg)
     except Exception as error:
         typer.echo(f"Runtime bootstrap failed: {error}", err=True)
         raise typer.Exit(code=1) from error

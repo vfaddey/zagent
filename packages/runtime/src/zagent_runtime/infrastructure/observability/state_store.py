@@ -12,7 +12,6 @@ from zagent_runtime.infrastructure.observability.redactor import SecretRedactor
 
 
 class StateStore:
-
     def __init__(self, serializer: JsonRecordSerializer, redactor: SecretRedactor) -> None:
         self._serializer = serializer
         self._redactor = redactor

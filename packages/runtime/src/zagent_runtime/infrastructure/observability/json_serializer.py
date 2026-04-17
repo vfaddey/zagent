@@ -35,4 +35,3 @@ class JsonRecordSerializer:
             return [self.to_jsonable(item) for item in value]
 
         return value
-

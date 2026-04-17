@@ -1,0 +1,13 @@
+{
+  "artifacts": [
+    "result.json",
+    "summary.md"
+  ],
+  "last_message_index": null,
+  "last_tool_call": null,
+  "phase": "finished",
+  "run_id": "default",
+  "started_at": "2026-04-17T18:19:21.742568Z",
+  "status": "succeeded",
+  "updated_at": "2026-04-17T18:19:49.395135Z"
+}

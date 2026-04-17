@@ -10,11 +10,21 @@ from zagent_runtime.application.register_tools import RegisteredTools
 from zagent_runtime.application.runtime_context import RuntimeContext, RuntimePaths
 from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
+from zagent_runtime.domain.observability import ChatMessage, RunEvent
 from zagent_runtime.domain.policy import PolicySpec
-from zagent_runtime.domain.run import ResultStatus, RunMode, RunSpec, RuntimeSpec, ToolsConfig
+from zagent_runtime.domain.run import (
+    ResultStatus,
+    RunMode,
+    RunSpec,
+    RunState,
+    RuntimeSpec,
+    ToolsConfig,
+)
 from zagent_runtime.domain.task import TaskSpec
+from zagent_runtime.domain.tools import ToolEvent
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentBundle
 from zagent_runtime.infrastructure.ag2.run_executor import Ag2RunExecutor
+from zagent_runtime.infrastructure.async_bridge import AsyncBridge
 
 
 def test_ag2_run_executor_passes_max_turns_and_adds_final_marker(tmp_path: Path) -> None:
@@ -25,15 +35,21 @@ def test_ag2_run_executor_passes_max_turns_and_adds_final_marker(tmp_path: Path)
         )
     )
     session = _session(executor=executor)
-    context = _context(tmp_path, max_turns=7, final_marker="DONE")
+    context = _context(tmp_path, max_turns=7)
 
-    result = Ag2RunExecutor().run(context, session)
+    result = Ag2RunExecutor(AsyncBridge(), NullObserver()).run(context, session)
 
+    bundle = session.backend
     assert executor.calls[0]["max_turns"] == 7
-    assert "finish your final response with `DONE`" in executor.calls[0]["message"]
+    assert "final response must end with `ZAGENT_DONE`" in bundle.assistant.system_message
+    assert "If you do not have enough context" in bundle.assistant.system_message
+    assert (
+        "A text-only answer is a valid final result only when it ends"
+        in bundle.assistant.system_message
+    )
     assert result.status is ResultStatus.SUCCESS
     assert result.summary == "I changed the file."
-    assert result.final_message == "I changed the file.\n\nDONE"
+    assert result.final_message == "I changed the file.\n\nZAGENT_DONE"
 
 
 def test_ag2_run_executor_preserves_existing_final_marker(tmp_path: Path) -> None:
@@ -44,11 +60,32 @@ def test_ag2_run_executor_preserves_existing_final_marker(tmp_path: Path) -> Non
         )
     )
     session = _session(executor=executor)
-    context = _context(tmp_path, max_turns=3, final_marker="ZAGENT_DONE")
+    context = _context(tmp_path, max_turns=3)
 
-    result = Ag2RunExecutor().run(context, session)
+    result = Ag2RunExecutor(AsyncBridge(), NullObserver()).run(context, session)
 
     assert result.final_message == "Summary\n\nZAGENT_DONE"
+
+
+def test_ag2_run_executor_closes_mcp_toolkits_and_emits_events(tmp_path: Path) -> None:
+    mcp_toolkit = FakeMcpToolkit(server_name="filesystem")
+    executor = FakeExecutor(
+        response=FakeResponse(
+            messages=[{"role": "assistant", "content": "Done"}],
+            summary="Done",
+        )
+    )
+    observer = NullObserver()
+    session = _session(executor=executor, mcp_toolkits=(mcp_toolkit,))
+    context = _context(tmp_path, max_turns=3)
+
+    Ag2RunExecutor(AsyncBridge(), observer).run(context, session)
+
+    assert mcp_toolkit.closed is True
+    assert [event.event for event in observer.run_events] == [
+        "mcp_server_disconnecting",
+        "mcp_server_disconnected",
+    ]
 
 
 @dataclass(slots=True)
@@ -61,17 +98,65 @@ class FakeResponse:
         self.processed = True
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, eq=False)
 class FakeExecutor:
     response: FakeResponse
     calls: list[dict[str, Any]] = field(default_factory=list)
+    chat_messages: dict[Any, list[dict[str, str]]] = field(default_factory=dict)
 
     def run(self, **kwargs: Any) -> FakeResponse:
         self.calls.append(kwargs)
         return self.response
 
 
-def _session(executor: FakeExecutor) -> AgentSession:
+@dataclass(slots=True, eq=False)
+class FakeAssistant:
+    system_message: str = "system"
+    chat_messages: dict[Any, list[dict[str, str]]] = field(default_factory=dict)
+
+    def update_system_message(self, message: str) -> None:
+        self.system_message = message
+
+
+@dataclass(slots=True)
+class FakeMcpToolkit:
+    server_name: str
+    closed: bool = False
+
+    async def aclose(self) -> None:
+        self.closed = True
+
+
+@dataclass(slots=True)
+class NullObserver:
+    run_events: list[RunEvent] = field(default_factory=list)
+
+    def on_run_started(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None:
+        return None
+
+    def on_event(self, paths: RuntimePaths, event: RunEvent) -> None:
+        self.run_events.append(event)
+
+    def on_message(self, paths: RuntimePaths, message: ChatMessage) -> None:
+        return None
+
+    def on_tool_started(self, paths: RuntimePaths, event: ToolEvent) -> None:
+        return None
+
+    def on_tool_finished(self, paths: RuntimePaths, event: ToolEvent) -> None:
+        return None
+
+    def on_phase_changed(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None:
+        return None
+
+    def on_run_finished(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None:
+        return None
+
+
+def _session(
+    executor: FakeExecutor,
+    mcp_toolkits: tuple[Any, ...] = (),
+) -> AgentSession:
     return AgentSession(
         prompt=PromptContext(
             system_message="system",
@@ -81,25 +166,27 @@ def _session(executor: FakeExecutor) -> AgentSession:
         ),
         registered_tools=RegisteredTools(specs=()),
         backend=Ag2AgentBundle(
-            assistant=object(),
+            assistant=FakeAssistant(),
             executor=executor,
             llm_config=object(),
             runtime_tools=(),
+            mcp_toolkits=mcp_toolkits,
         ),
     )
 
 
-def _context(workspace: Path, max_turns: int, final_marker: str) -> RuntimeContext:
-    agent_env_dir = workspace / ".agent"
+def _context(workspace: Path, max_turns: int) -> RuntimeContext:
+    agent_env_dir = workspace / ".zagent"
     run_dir = agent_env_dir / "artifacts" / "run-1"
+    run_dir.mkdir(parents=True)
     return RuntimeContext(
         run_spec=RunSpec(
             run_id="run-1",
             mode=RunMode.FIX,
             task=TaskSpec(
                 title="Fix",
-                description="Fix bug.",
                 workspace=str(workspace),
+                prompt="Fix bug.",
             ),
             model=ModelSpec(
                 provider=ModelProvider.OPENAI_COMPATIBLE,
@@ -111,7 +198,6 @@ def _context(workspace: Path, max_turns: int, final_marker: str) -> RuntimeConte
                 image="zagent-runtime:local",
                 workdir=str(workspace),
                 max_turns=max_turns,
-                final_marker=final_marker,
             ),
             tools=ToolsConfig(),
             policy=PolicySpec(writable_paths=(str(workspace),)),
@@ -124,11 +210,11 @@ def _context(workspace: Path, max_turns: int, final_marker: str) -> RuntimeConte
             run_spec_file=workspace / "run.yaml",
             workspace=workspace,
             agent_env_dir=agent_env_dir,
-            agent_env_config_file=agent_env_dir / "config.yaml",
             artifacts_root_dir=agent_env_dir / "artifacts",
             run_artifacts_dir=run_dir,
             state_file=run_dir / "state.json",
             chat_file=run_dir / "chat.jsonl",
+            ag2_history_file=run_dir / "ag2_history.json",
             events_file=run_dir / "events.jsonl",
             tools_file=run_dir / "tools.jsonl",
             result_file=run_dir / "result.json",

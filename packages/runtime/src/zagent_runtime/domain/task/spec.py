@@ -10,6 +10,6 @@ class TaskSpec:
     """User-facing task definition for one run."""
 
     title: str
-    description: str
     workspace: str
-
+    prompt: str | None = None
+    prompt_file: str | None = None

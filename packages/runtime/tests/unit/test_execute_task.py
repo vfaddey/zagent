@@ -43,7 +43,12 @@ def test_execute_task_delegates_to_backend_runner(tmp_path: Path) -> None:
 
 @dataclass(slots=True)
 class FakeRunner:
-    def run(self, context: RuntimeContext, session: AgentSession) -> RunResult:
+    def run(
+        self,
+        context: RuntimeContext,
+        session: AgentSession,
+        continue_msg: str | None = None,
+    ) -> RunResult:
         return RunResult(
             run_id=context.run_spec.run_id,
             status=ResultStatus.SUCCESS,
@@ -53,7 +58,7 @@ class FakeRunner:
 
 
 def _context(workspace: Path) -> RuntimeContext:
-    agent_env_dir = workspace / ".agent"
+    agent_env_dir = workspace / ".zagent"
     run_dir = agent_env_dir / "artifacts" / "run-1"
     return RuntimeContext(
         run_spec=RunSpec(
@@ -61,8 +66,8 @@ def _context(workspace: Path) -> RuntimeContext:
             mode=RunMode.FIX,
             task=TaskSpec(
                 title="Fix",
-                description="Fix bug.",
                 workspace=str(workspace),
+                prompt="Fix bug.",
             ),
             model=ModelSpec(
                 provider=ModelProvider.OPENAI_COMPATIBLE,
@@ -82,15 +87,14 @@ def _context(workspace: Path) -> RuntimeContext:
             run_spec_file=workspace / "run.yaml",
             workspace=workspace,
             agent_env_dir=agent_env_dir,
-            agent_env_config_file=agent_env_dir / "config.yaml",
             artifacts_root_dir=agent_env_dir / "artifacts",
             run_artifacts_dir=run_dir,
             state_file=run_dir / "state.json",
             chat_file=run_dir / "chat.jsonl",
+            ag2_history_file=run_dir / "ag2_history.json",
             events_file=run_dir / "events.jsonl",
             tools_file=run_dir / "tools.jsonl",
             result_file=run_dir / "result.json",
             summary_file=run_dir / "summary.md",
         ),
     )
-

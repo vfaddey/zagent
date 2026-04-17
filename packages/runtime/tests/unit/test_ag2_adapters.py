@@ -17,7 +17,6 @@ from zagent_runtime.infrastructure.ag2.tool_adapter import Ag2RuntimeToolAdapter
 from zagent_runtime.infrastructure.security.policies import FileSystemPolicy
 from zagent_runtime.infrastructure.tools.builtin.catalog import BuiltinToolCatalog
 from zagent_runtime.infrastructure.tools.builtin.files import FilesTool
-from zagent_runtime.infrastructure.tools.builtin.git import GitTool
 from zagent_runtime.infrastructure.tools.builtin.shell import ShellTool
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry
 
@@ -40,23 +39,23 @@ def test_ag2_model_config_builder_includes_native_builtin_tools(
 
 
 def test_ag2_model_config_builder_uses_openai_api_without_native_tools(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("files", "git", "shell"))
+    context = _context(tmp_path, builtin_tools=("files", "shell"))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
 
     config = Ag2ModelConfigBuilder().build(context, registry)
 
     assert config.config_list["api_type"] == "openai"
+    assert config.config_list["timeout"] == 120
     assert "built_in_tools" not in config.config_list
 
 
 def test_ag2_runtime_tool_adapter_builds_runtime_native_tools(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("files", "git", "shell"))
+    context = _context(tmp_path, builtin_tools=("files", "shell"))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     adapter = Ag2RuntimeToolAdapter(
         files_tool=FilesTool(FileSystemPolicy()),
-        git_tool=GitTool(),
         shell_tool=ShellTool(),
         observer=TraceObserver(),
     )
@@ -67,8 +66,6 @@ def test_ag2_runtime_tool_adapter_builds_runtime_native_tools(tmp_path: Path) ->
         "files_read_text",
         "files_write_text",
         "files_list_dir",
-        "git_status",
-        "git_diff",
         "shell_run",
     ]
 
@@ -79,7 +76,6 @@ def test_ag2_runtime_files_tool_function_returns_json_result(tmp_path: Path) -> 
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     adapter = Ag2RuntimeToolAdapter(
         files_tool=FilesTool(FileSystemPolicy()),
-        git_tool=GitTool(),
         shell_tool=ShellTool(),
         observer=TraceObserver(),
     )
@@ -98,7 +94,6 @@ def test_ag2_runtime_shell_tool_function_returns_json_result(tmp_path: Path) -> 
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     adapter = Ag2RuntimeToolAdapter(
         files_tool=FilesTool(FileSystemPolicy()),
-        git_tool=GitTool(),
         shell_tool=ShellTool(),
         observer=TraceObserver(),
     )
@@ -117,7 +112,6 @@ def test_ag2_runtime_tool_adapter_traces_tool_calls(tmp_path: Path) -> None:
     observer = TraceObserver()
     adapter = Ag2RuntimeToolAdapter(
         files_tool=FilesTool(FileSystemPolicy()),
-        git_tool=GitTool(),
         shell_tool=ShellTool(),
         observer=observer,
     )
@@ -142,6 +136,9 @@ class TraceObserver:
     def on_run_started(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None:
         return None
 
+    def on_event(self, paths: RuntimePaths, event: RunEvent) -> None:
+        return None
+
     def on_message(self, paths: RuntimePaths, message: ChatMessage) -> None:
         return None
 
@@ -159,7 +156,7 @@ class TraceObserver:
 
 
 def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
-    agent_env_dir = workspace / ".agent"
+    agent_env_dir = workspace / ".zagent"
     run_dir = agent_env_dir / "artifacts" / "run-1"
     return RuntimeContext(
         run_spec=RunSpec(
@@ -167,14 +164,15 @@ def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
             mode=RunMode.FIX,
             task=TaskSpec(
                 title="Fix",
-                description="Fix",
                 workspace=str(workspace),
+                prompt="Fix",
             ),
             model=ModelSpec(
                 provider=ModelProvider.OPENAI_COMPATIBLE,
                 model="gpt-5",
                 api_key_env="OPENAI_API_KEY",
                 api_base="https://api.openai.com/v1",
+                timeout_seconds=120,
             ),
             agent_env=AgentEnvRef(path=str(agent_env_dir)),
             runtime=RuntimeSpec(image="zagent-runtime:local", workdir=str(workspace)),
@@ -189,11 +187,11 @@ def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
             run_spec_file=workspace / "run.yaml",
             workspace=workspace,
             agent_env_dir=agent_env_dir,
-            agent_env_config_file=agent_env_dir / "config.yaml",
             artifacts_root_dir=agent_env_dir / "artifacts",
             run_artifacts_dir=run_dir,
             state_file=run_dir / "state.json",
             chat_file=run_dir / "chat.jsonl",
+            ag2_history_file=run_dir / "ag2_history.json",
             events_file=run_dir / "events.jsonl",
             tools_file=run_dir / "tools.jsonl",
             result_file=run_dir / "result.json",

@@ -27,10 +27,7 @@ class SecretRedactor:
         return redacted
 
     def redact_mapping(self, data: Mapping[str, Any]) -> dict[str, Any]:
-        return {
-            key: self._redact_value(key=key, value=value)
-            for key, value in data.items()
-        }
+        return {key: self._redact_value(key=key, value=value) for key, value in data.items()}
 
     def _redact_value(self, key: str, value: Any) -> Any:
         if self._is_sensitive_key(key):
@@ -50,4 +47,3 @@ class SecretRedactor:
     def _is_sensitive_key(self, key: str) -> bool:
         normalized = key.lower()
         return any(part in normalized for part in self._sensitive_key_parts)
-

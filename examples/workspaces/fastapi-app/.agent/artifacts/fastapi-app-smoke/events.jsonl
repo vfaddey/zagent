@@ -1,4 +1,0 @@
-{"event": "run_started", "payload": {"run_id": "fastapi-app-smoke"}, "ts": "2026-04-15T09:44:46.804727Z"}
-{"event": "task_started", "payload": {}, "ts": "2026-04-15T09:44:46.855910Z"}
-{"event": "result_collecting", "payload": {}, "ts": "2026-04-15T09:46:53.839437Z"}
-{"event": "run_finished", "payload": {"status": "success"}, "ts": "2026-04-15T09:46:53.844113Z"}

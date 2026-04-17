@@ -106,16 +106,16 @@ def _observer(secret_values: tuple[str, ...] = ()) -> RunObserver:
 
 
 def _runtime_paths(root: Path) -> RuntimePaths:
-    run_dir = root / ".agent" / "artifacts" / "run-1"
+    run_dir = root / ".zagent" / "artifacts" / "run-1"
     return RuntimePaths(
         run_spec_file=root / "run.yaml",
         workspace=root,
-        agent_env_dir=root / ".agent",
-        agent_env_config_file=root / ".agent" / "config.yaml",
-        artifacts_root_dir=root / ".agent" / "artifacts",
+        agent_env_dir=root / ".zagent",
+        artifacts_root_dir=root / ".zagent" / "artifacts",
         run_artifacts_dir=run_dir,
         state_file=run_dir / "state.json",
         chat_file=run_dir / "chat.jsonl",
+        ag2_history_file=run_dir / "ag2_history.json",
         events_file=run_dir / "events.jsonl",
         tools_file=run_dir / "tools.jsonl",
         result_file=run_dir / "result.json",
@@ -129,4 +129,3 @@ def _jsonl(path: Path) -> list[dict[str, object]]:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line
     ]
-

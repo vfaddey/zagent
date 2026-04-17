@@ -14,8 +14,8 @@ def test_runtime_run_spec_entity_can_be_composed() -> None:
         mode=RunMode.FIX,
         task=TaskSpec(
             title="Fix pagination",
-            description="Fix pagination on reports page.",
             workspace="/workspace",
+            prompt="Fix pagination on reports page.",
         ),
         model=ModelSpec(
             provider=ModelProvider.OPENAI_COMPATIBLE,
@@ -23,14 +23,14 @@ def test_runtime_run_spec_entity_can_be_composed() -> None:
             api_key_env="OPENAI_API_KEY",
             api_base="https://api.openai.com/v1",
         ),
-        agent_env=AgentEnvRef(path="/workspace/.agent"),
+        agent_env=AgentEnvRef(path="/workspace/.zagent"),
         runtime=RuntimeSpec(image="zagent-runtime:local", workdir="/workspace"),
-        tools=ToolsConfig(builtin=("shell", "files", "git", "apply_patch")),
+        tools=ToolsConfig(builtin=("shell", "files", "apply_patch")),
         policy=PolicySpec(writable_paths=("/workspace",)),
     )
 
     assert spec.run_id == "fix-123"
-    assert spec.tools.builtin == ("shell", "files", "git", "apply_patch")
+    assert spec.tools.builtin == ("shell", "files", "apply_patch")
 
 
 def test_tool_spec_is_independent_from_ag2() -> None:

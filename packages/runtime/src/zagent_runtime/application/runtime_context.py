@@ -14,11 +14,11 @@ class RuntimePaths:
     run_spec_file: Path
     workspace: Path
     agent_env_dir: Path
-    agent_env_config_file: Path
     artifacts_root_dir: Path
     run_artifacts_dir: Path
     state_file: Path
     chat_file: Path
+    ag2_history_file: Path
     events_file: Path
     tools_file: Path
     result_file: Path
@@ -30,4 +30,3 @@ class RuntimeContext:
     run_spec: RunSpec
     agent_env: AgentEnv
     paths: RuntimePaths
-

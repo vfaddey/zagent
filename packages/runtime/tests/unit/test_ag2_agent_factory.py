@@ -15,10 +15,10 @@ from zagent_runtime.domain.tools import ToolEvent
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentFactory
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.tool_adapter import Ag2RuntimeToolAdapter
+from zagent_runtime.infrastructure.mcp.adapters import Ag2McpToolAdapter
 from zagent_runtime.infrastructure.security.policies import FileSystemPolicy
 from zagent_runtime.infrastructure.tools.builtin.catalog import BuiltinToolCatalog
 from zagent_runtime.infrastructure.tools.builtin.files import FilesTool
-from zagent_runtime.infrastructure.tools.builtin.git import GitTool
 from zagent_runtime.infrastructure.tools.builtin.shell import ShellTool
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry
 
@@ -28,17 +28,17 @@ def test_ag2_agent_factory_creates_bundle_with_runtime_tools(
     monkeypatch,
 ) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-    context = _context(tmp_path, builtin_tools=("files", "git"))
+    context = _context(tmp_path, builtin_tools=("files", "shell"))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     factory = Ag2AgentFactory(
         model_config_builder=Ag2ModelConfigBuilder(),
         runtime_tool_adapter=Ag2RuntimeToolAdapter(
             files_tool=FilesTool(FileSystemPolicy()),
-            git_tool=GitTool(),
             shell_tool=ShellTool(),
             observer=TraceObserver(),
         ),
+        mcp_tool_adapter=NoopMcpToolAdapter(),
         tool_registry=registry,
     )
 
@@ -55,8 +55,7 @@ def test_ag2_agent_factory_creates_bundle_with_runtime_tools(
         "files_read_text",
         "files_write_text",
         "files_list_dir",
-        "git_status",
-        "git_diff",
+        "shell_run",
     ]
 
 
@@ -72,10 +71,10 @@ def test_ag2_agent_factory_creates_bundle_with_ag2_native_tools_only(
         model_config_builder=Ag2ModelConfigBuilder(),
         runtime_tool_adapter=Ag2RuntimeToolAdapter(
             files_tool=FilesTool(FileSystemPolicy()),
-            git_tool=GitTool(),
             shell_tool=ShellTool(),
             observer=TraceObserver(),
         ),
+        mcp_tool_adapter=NoopMcpToolAdapter(),
         tool_registry=registry,
     )
 
@@ -103,6 +102,9 @@ class TraceObserver:
     def on_run_started(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None:
         return None
 
+    def on_event(self, paths: RuntimePaths, event: RunEvent) -> None:
+        return None
+
     def on_message(self, paths: RuntimePaths, message: ChatMessage) -> None:
         return None
 
@@ -119,8 +121,16 @@ class TraceObserver:
         return None
 
 
+class NoopMcpToolAdapter(Ag2McpToolAdapter):
+    def __init__(self) -> None:
+        return None
+
+    def register(self, context, assistant, executor):
+        return ()
+
+
 def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
-    agent_env_dir = workspace / ".agent"
+    agent_env_dir = workspace / ".zagent"
     run_dir = agent_env_dir / "artifacts" / "run-1"
     return RuntimeContext(
         run_spec=RunSpec(
@@ -128,8 +138,8 @@ def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
             mode=RunMode.FIX,
             task=TaskSpec(
                 title="Fix",
-                description="Fix",
                 workspace=str(workspace),
+                prompt="Fix",
             ),
             model=ModelSpec(
                 provider=ModelProvider.OPENAI_COMPATIBLE,
@@ -150,11 +160,11 @@ def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
             run_spec_file=workspace / "run.yaml",
             workspace=workspace,
             agent_env_dir=agent_env_dir,
-            agent_env_config_file=agent_env_dir / "config.yaml",
             artifacts_root_dir=agent_env_dir / "artifacts",
             run_artifacts_dir=run_dir,
             state_file=run_dir / "state.json",
             chat_file=run_dir / "chat.jsonl",
+            ag2_history_file=run_dir / "ag2_history.json",
             events_file=run_dir / "events.jsonl",
             tools_file=run_dir / "tools.jsonl",
             result_file=run_dir / "result.json",

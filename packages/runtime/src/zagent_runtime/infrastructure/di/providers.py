@@ -16,13 +16,21 @@ from zagent_runtime.application.execute_task import AgentBackendRunner, ExecuteT
 from zagent_runtime.application.load_agent_env import AgentEnvLoader, LoadAgentEnv
 from zagent_runtime.application.load_run_spec import LoadRunSpec, RunSpecLoader
 from zagent_runtime.application.observe_run import RunObserverPort
+from zagent_runtime.application.register_mcp import McpServerLoader
 from zagent_runtime.application.register_tools import RegisterTools, RuntimeToolRegistry
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentFactory
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.run_executor import Ag2RunExecutor
 from zagent_runtime.infrastructure.ag2.tool_adapter import Ag2RuntimeToolAdapter
-from zagent_runtime.infrastructure.config.loaders import YamlAgentEnvLoader, YamlRunSpecLoader
+from zagent_runtime.infrastructure.async_bridge import AsyncBridge
+from zagent_runtime.infrastructure.config.loaders import (
+    DirectoryAgentEnvLoader,
+    YamlMcpServerLoader,
+    YamlRunSpecLoader,
+)
 from zagent_runtime.infrastructure.config.path_resolver import DefaultRuntimePathResolver
+from zagent_runtime.infrastructure.mcp.adapters import Ag2McpToolAdapter
+from zagent_runtime.infrastructure.mcp.client_factory import Ag2McpToolkitFactory
 from zagent_runtime.infrastructure.observability.chat_writer import ChatWriter
 from zagent_runtime.infrastructure.observability.event_writer import EventWriter
 from zagent_runtime.infrastructure.observability.json_serializer import JsonRecordSerializer
@@ -38,7 +46,6 @@ from zagent_runtime.infrastructure.runtime.result_writer import JsonRunResultWri
 from zagent_runtime.infrastructure.security.policies import FileSystemPolicy
 from zagent_runtime.infrastructure.tools.builtin.catalog import BuiltinToolCatalog
 from zagent_runtime.infrastructure.tools.builtin.files import FilesTool
-from zagent_runtime.infrastructure.tools.builtin.git import GitTool
 from zagent_runtime.infrastructure.tools.builtin.shell import ShellTool
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry
 
@@ -47,7 +54,8 @@ class RuntimeProvider(Provider):
     scope = Scope.APP
 
     run_spec_loader = provide(YamlRunSpecLoader, provides=RunSpecLoader)
-    agent_env_loader = provide(YamlAgentEnvLoader, provides=AgentEnvLoader)
+    agent_env_loader = provide(DirectoryAgentEnvLoader, provides=AgentEnvLoader)
+    mcp_server_loader = provide(YamlMcpServerLoader, provides=McpServerLoader)
     path_resolver = provide(DefaultRuntimePathResolver, provides=RuntimePathResolver)
     prompt_document_loader = provide(MarkdownPromptDocumentLoader, provides=PromptDocumentLoader)
     runtime_prompt_builder = provide(RuntimePromptBuilder)
@@ -55,8 +63,8 @@ class RuntimeProvider(Provider):
     tool_registry = provide(ToolRegistry)
     filesystem_policy = provide(FileSystemPolicy)
     files_tool = provide(FilesTool)
-    git_tool = provide(GitTool)
     shell_tool = provide(ShellTool)
+    async_bridge = provide(AsyncBridge)
 
     load_run_spec = provide(LoadRunSpec)
     load_agent_env = provide(LoadAgentEnv)
@@ -105,6 +113,8 @@ class Ag2RuntimeProvider(Provider):
     ag2_model_config_builder = provide(Ag2ModelConfigBuilder)
     ag2_run_executor = provide(Ag2RunExecutor)
     ag2_runtime_tool_adapter = provide(Ag2RuntimeToolAdapter)
+    ag2_mcp_toolkit_factory = provide(Ag2McpToolkitFactory)
+    ag2_mcp_tool_adapter = provide(Ag2McpToolAdapter)
 
     @provide
     def agent_factory(self, ag2_agent_factory: Ag2AgentFactory) -> AgentFactory:

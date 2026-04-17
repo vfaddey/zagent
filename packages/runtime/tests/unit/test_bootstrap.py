@@ -14,7 +14,7 @@ def test_bootstrap_dry_run_writes_runtime_artifacts(tmp_path: Path) -> None:
 
     result = container.get(BootstrapRun)(run_spec_file)
 
-    run_dir = tmp_path / ".agent" / "artifacts" / "run-1"
+    run_dir = tmp_path / ".zagent" / "artifacts" / "run-1"
     state = json.loads((run_dir / "state.json").read_text(encoding="utf-8"))
     result_json = json.loads((run_dir / "result.json").read_text(encoding="utf-8"))
 
@@ -39,7 +39,7 @@ def test_bootstrap_dry_run_writes_runtime_artifacts(tmp_path: Path) -> None:
 
 
 def _write_runtime_workspace(root: Path) -> Path:
-    agent_env = root / ".agent"
+    agent_env = root / ".zagent"
     (agent_env / "prompts").mkdir(parents=True)
     (agent_env / "rules").mkdir()
     (agent_env / "skills").mkdir()
@@ -60,45 +60,29 @@ def _write_runtime_workspace(root: Path) -> Path:
         "# Python Skill\n\nRun tests when possible.",
         encoding="utf-8",
     )
-    (agent_env / "config.yaml").write_text(
-        """
-name: test-env
-prompts:
-  system: prompts/system.md
-  task: prompts/task.md
-rules:
-  - rules/global.md
-skills:
-  - skills/python.md
-files: {}
-""".lstrip(),
-        encoding="utf-8",
-    )
-
-    run_spec_file = root / "run.yaml"
+    run_spec_file = agent_env / "run.yaml"
     run_spec_file.write_text(
         """
 run_id: run-1
 mode: fix
 task:
   title: Test bootstrap
-  description: Verify bootstrap wiring.
-  workspace: .
+  prompt_file: prompts/task.md
+  workspace: ..
 model:
   provider: openai_compatible
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 agent_env:
-  path: .agent
+  path: .zagent
 runtime:
   image: zagent-runtime:local
   workdir: .
   max_turns: 3
-  final_marker: ZAGENT_DONE
 tools:
   builtin:
     - files
-    - git
+    - shell
   custom: []
   enable_mcp: false
 policy:

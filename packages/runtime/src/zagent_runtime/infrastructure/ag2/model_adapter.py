@@ -39,4 +39,10 @@ class Ag2ModelConfigBuilder:
         if model.api_base:
             payload["base_url"] = model.api_base
 
+        if model.timeout_seconds is not None:
+            payload["timeout"] = model.timeout_seconds
+
+        if model.reasoning_effort is not None:
+            payload["reasoning_effort"] = model.reasoning_effort
+
         return Ag2LlmConfigSpec(config_list=payload)
