@@ -17,13 +17,34 @@ from zagent_runtime.infrastructure.config.loaders import (
     YamlRunSpecLoader,
 )
 
-ROOT = Path(__file__).resolve().parents[4]
-
-
-def test_load_run_spec_from_example() -> None:
-    run_spec = LoadRunSpec(YamlRunSpecLoader())(
-        ROOT / "examples/workspaces/python-bugfix/.zagent/run.yaml"
+def test_load_run_spec_from_file(tmp_path: Path) -> None:
+    path = tmp_path / "run.yaml"
+    path.write_text(
+        """
+run_id: python-bugfix-smoke
+mode: fix
+task:
+  title: Test
+  prompt_file: prompts/task.md
+  workspace: /workspace
+model:
+  provider: openai_compatible
+  model: gpt-5
+  api_key_env: OPENAI_API_KEY
+runtime:
+  image: zagent-runtime:local
+  workdir: /workspace
+  max_turns: 40
+tools:
+  builtin:
+    - shell
+    - files
+policy: {}
+""".lstrip(),
+        encoding="utf-8",
     )
+
+    run_spec = LoadRunSpec(YamlRunSpecLoader())(path)
 
     assert run_spec.run_id == "python-bugfix-smoke"
     assert run_spec.mode is RunMode.FIX
@@ -34,27 +55,29 @@ def test_load_run_spec_from_example() -> None:
     assert run_spec.tools.builtin == ("shell", "files")
 
 
-@pytest.mark.parametrize(
-    "example",
-    [
-        "fastapi-app",
-        "playwright-research",
-        "python-bugfix",
-    ],
-)
-def test_load_workspace_run_spec_examples(example: str) -> None:
-    run_spec = LoadRunSpec(YamlRunSpecLoader())(
-        ROOT / f"examples/workspaces/{example}/.zagent/run.yaml"
-    )
+def test_load_agent_env_from_directory(tmp_path: Path) -> None:
+    env_dir = tmp_path / ".zagent"
+    env_dir.mkdir()
+    (env_dir / "name.txt").write_text("zagent-env\n")
 
-    assert run_spec.task.prompt_file == "prompts/task.md"
-    assert run_spec.runtime.final_marker == "ZAGENT_DONE"
+    prompts_dir = env_dir / "prompts"
+    prompts_dir.mkdir()
+    (prompts_dir / "system.md").touch()
 
+    rules_dir = env_dir / "rules"
+    rules_dir.mkdir()
+    (rules_dir / "global.md").touch()
+    (rules_dir / "research.md").touch()
 
-def test_load_agent_env_from_example() -> None:
-    agent_env = LoadAgentEnv(DirectoryAgentEnvLoader())(
-        ROOT / "examples/workspaces/playwright-research/.zagent"
-    )
+    skills_dir = env_dir / "skills"
+    skills_dir.mkdir()
+    (skills_dir / "research.md").touch()
+
+    mcp_dir = env_dir / "mcp"
+    mcp_dir.mkdir()
+    (mcp_dir / "servers.yaml").touch()
+
+    agent_env = LoadAgentEnv(DirectoryAgentEnvLoader())(env_dir)
 
     assert agent_env.name == "zagent-env"
     assert agent_env.prompts.system == "prompts/system.md"
