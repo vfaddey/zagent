@@ -12,8 +12,8 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-publish-pypi:
-    name: Build and publish to PyPI
+  build-and-publish-launcher:
+    name: Build and publish Launcher to PyPI
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -29,15 +29,38 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      - name: Build distributions
-        run: |
-          uv build --package zagent-launcher --out-dir dist/
-          uv build --package zagent-runtime --out-dir dist/
+      - name: Build launcher
+        run: uv build --package zagent-launcher --out-dir dist/launcher/
 
-      - name: Publish to PyPI
+      - name: Publish launcher to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: dist/
+          packages-dir: dist/launcher/
+
+  build-and-publish-runtime:
+    name: Build and publish Runtime to PyPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Build runtime
+        run: uv build --package zagent-runtime --out-dir dist/runtime/
+
+      - name: Publish runtime to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/runtime/
 
   build-and-push-docker:
     name: Build and push Docker image
@@ -75,5 +98,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=ghcr,scope=${{ github.repository }}
-          cache-to: type=ghcr,scope=${{ github.repository }},mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
