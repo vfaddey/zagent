@@ -10,3 +10,6 @@ from zagent_launcher.application.interfaces import HostEnvironment
 class OsHostEnvironment(HostEnvironment):
     def has(self, name: str) -> bool:
         return bool(os.environ.get(name))
+
+    def get(self, name: str) -> str | None:
+        return os.environ.get(name)

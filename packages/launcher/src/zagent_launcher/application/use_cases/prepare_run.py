@@ -34,11 +34,17 @@ class PrepareRun:
         if request.continue_message is not None:
             command.extend(("--continue", request.continue_message))
 
+        host_workspace_path = self._host_environment.get("ZAGENT_HOST_WORKSPACE_PATH")
+        if host_workspace_path:
+            mount_host_path = Path(host_workspace_path).expanduser().resolve(strict=False)
+        else:
+            mount_host_path = project_root
+
         return ContainerSpec(
             image=request.image_override or run_spec.runtime_image,
             command=tuple(command),
             workdir=run_spec.runtime_workdir,
-            mounts=(MountSpec(host_path=project_root, container_path=self._WORKSPACE_MOUNT),),
+            mounts=(MountSpec(host_path=mount_host_path, container_path=self._WORKSPACE_MOUNT),),
             env=(run_spec.model_api_key_env,),
             network=self._docker_network(run_spec.policy_network),
         )
