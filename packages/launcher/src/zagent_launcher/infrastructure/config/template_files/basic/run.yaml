@@ -14,7 +14,7 @@ model:
   reasoning_effort: medium
 
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
   max_turns: 40
 
