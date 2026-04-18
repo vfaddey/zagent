@@ -1,6 +1,6 @@
 [project]
 name = "zagent-workspace"
-version = "0.1.0"
+version = "0.1.1"
 description = "Workspace for ZAgent runtime and launcher packages."
 readme = "README.md"
 authors = [

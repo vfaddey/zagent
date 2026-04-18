@@ -1,6 +1,6 @@
 [project]
 name = "zagent-launcher"
-version = "0.1.0"
+version = "0.1.1"
 description = "Host-side CLI and Python API for launching ZAgent runtime containers."
 readme = "README.md"
 authors = [
