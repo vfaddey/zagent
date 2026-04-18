@@ -4,13 +4,9 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
-from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
-from zagent_runtime.domain.model import ModelProvider, ModelSpec
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.domain.observability import ChatMessage, RunEvent
-from zagent_runtime.domain.policy import PolicySpec
-from zagent_runtime.domain.run import RunMode, RunSpec, RunState, RuntimeSpec, ToolsConfig
-from zagent_runtime.domain.task import TaskSpec
+from zagent_runtime.domain.run import RunState
 from zagent_runtime.domain.tools import ToolCallStatus, ToolEvent
 from zagent_runtime.infrastructure.ag2.model_adapter import Ag2ModelConfigBuilder
 from zagent_runtime.infrastructure.ag2.tool_adapter import Ag2RuntimeToolAdapter
@@ -20,13 +16,15 @@ from zagent_runtime.infrastructure.tools.builtin.files import FilesTool
 from zagent_runtime.infrastructure.tools.builtin.shell import ShellTool
 from zagent_runtime.infrastructure.tools.registry import ToolRegistry
 
+from .factories import create_context
+
 
 def test_ag2_model_config_builder_includes_native_builtin_tools(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
-    context = _context(tmp_path, builtin_tools=("apply_patch", "web_search"))
+    context = create_context(tmp_path, builtin_tools=("apply_patch", "web_search"))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
 
@@ -39,7 +37,7 @@ def test_ag2_model_config_builder_includes_native_builtin_tools(
 
 
 def test_ag2_model_config_builder_uses_openai_api_without_native_tools(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("files", "shell"))
+    context = create_context(tmp_path, builtin_tools=("files", "shell"))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
 
@@ -51,7 +49,7 @@ def test_ag2_model_config_builder_uses_openai_api_without_native_tools(tmp_path:
 
 
 def test_ag2_runtime_tool_adapter_builds_runtime_native_tools(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("files", "shell"))
+    context = create_context(tmp_path, builtin_tools=("files", "shell"))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     adapter = Ag2RuntimeToolAdapter(
@@ -71,7 +69,7 @@ def test_ag2_runtime_tool_adapter_builds_runtime_native_tools(tmp_path: Path) ->
 
 
 def test_ag2_runtime_files_tool_function_returns_json_result(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("files",))
+    context = create_context(tmp_path, builtin_tools=("files",))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     adapter = Ag2RuntimeToolAdapter(
@@ -89,7 +87,7 @@ def test_ag2_runtime_files_tool_function_returns_json_result(tmp_path: Path) -> 
 
 
 def test_ag2_runtime_shell_tool_function_returns_json_result(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("shell",))
+    context = create_context(tmp_path, builtin_tools=("shell",))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     adapter = Ag2RuntimeToolAdapter(
@@ -106,7 +104,7 @@ def test_ag2_runtime_shell_tool_function_returns_json_result(tmp_path: Path) -> 
 
 
 def test_ag2_runtime_tool_adapter_traces_tool_calls(tmp_path: Path) -> None:
-    context = _context(tmp_path, builtin_tools=("shell",))
+    context = create_context(tmp_path, builtin_tools=("shell",))
     registry = ToolRegistry(BuiltinToolCatalog())
     registry.register_builtin_tools(context.run_spec.tools.builtin)
     observer = TraceObserver()
@@ -155,46 +153,3 @@ class TraceObserver:
         return None
 
 
-def _context(workspace: Path, builtin_tools: tuple[str, ...]) -> RuntimeContext:
-    agent_env_dir = workspace / ".zagent"
-    run_dir = agent_env_dir / "artifacts" / "run-1"
-    return RuntimeContext(
-        run_spec=RunSpec(
-            run_id="run-1",
-            mode=RunMode.FIX,
-            task=TaskSpec(
-                title="Fix",
-                workspace=str(workspace),
-                prompt="Fix",
-            ),
-            model=ModelSpec(
-                provider=ModelProvider.OPENAI_COMPATIBLE,
-                model="gpt-5",
-                api_key_env="OPENAI_API_KEY",
-                api_base="https://api.openai.com/v1",
-                timeout_seconds=120,
-            ),
-            agent_env=AgentEnvRef(path=str(agent_env_dir)),
-            runtime=RuntimeSpec(image="zagent-runtime:local", workdir=str(workspace)),
-            tools=ToolsConfig(builtin=builtin_tools),
-            policy=PolicySpec(writable_paths=(str(workspace),)),
-        ),
-        agent_env=AgentEnv(
-            name="test",
-            prompts=PromptFiles(),
-        ),
-        paths=RuntimePaths(
-            run_spec_file=workspace / "run.yaml",
-            workspace=workspace,
-            agent_env_dir=agent_env_dir,
-            artifacts_root_dir=agent_env_dir / "artifacts",
-            run_artifacts_dir=run_dir,
-            state_file=run_dir / "state.json",
-            chat_file=run_dir / "chat.jsonl",
-            ag2_history_file=run_dir / "ag2_history.json",
-            events_file=run_dir / "events.jsonl",
-            tools_file=run_dir / "tools.jsonl",
-            result_file=run_dir / "result.json",
-            summary_file=run_dir / "summary.md",
-        ),
-    )

@@ -68,7 +68,7 @@ def _run_spec_with_tools(names: tuple[str, ...]) -> RunSpec:
             api_key_env="OPENAI_API_KEY",
         ),
         agent_env=AgentEnvRef(path="/workspace/.zagent"),
-        runtime=RuntimeSpec(image="zagent-runtime:local", workdir="/workspace"),
+        runtime=RuntimeSpec(image="ghcr.io/vfaddey/zagent-runtime:latest", workdir="/workspace"),
         tools=ToolsConfig(builtin=names),
         policy=PolicySpec(),
     )

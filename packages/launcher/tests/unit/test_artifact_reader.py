@@ -132,7 +132,7 @@ agent_env:
 model:
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: dummy-image:test
   workdir: /workspace
 policy:
   network: restricted

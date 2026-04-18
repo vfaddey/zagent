@@ -12,6 +12,8 @@ from zagent_launcher.application.interfaces import HostEnvironment, RunSpecReade
 from zagent_launcher.application.use_cases import PrepareRun
 from zagent_launcher.domain import RunRequest
 
+from .factories import create_launcher_run_spec
+
 
 class StubRunSpecReader(RunSpecReader):
     def __init__(self, run_spec: LauncherRunSpec) -> None:
@@ -33,13 +35,7 @@ class StubHostEnvironment(HostEnvironment):
 
 def test_prepare_run_builds_runtime_container_spec(tmp_path: Path) -> None:
     reader = StubRunSpecReader(
-        LauncherRunSpec(
-            run_id="run-1",
-            runtime_image="zagent-runtime:local",
-            runtime_workdir="/workspace",
-            model_api_key_env="OPENAI_API_KEY",
-            policy_network="restricted",
-        )
+        create_launcher_run_spec()
     )
     use_case = PrepareRun(reader, StubHostEnvironment({"OPENAI_API_KEY"}))
 
@@ -53,7 +49,7 @@ def test_prepare_run_builds_runtime_container_spec(tmp_path: Path) -> None:
     )
 
     assert reader.path == (tmp_path / ".zagent/run.yaml").resolve(strict=False)
-    assert spec.image == "zagent-runtime:local"
+    assert spec.image == "dummy-image:test"
     assert spec.workdir == "/workspace"
     assert spec.command == (
         "run",
@@ -72,13 +68,7 @@ def test_prepare_run_builds_runtime_container_spec(tmp_path: Path) -> None:
 def test_prepare_run_allows_image_override(tmp_path: Path) -> None:
     use_case = PrepareRun(
         StubRunSpecReader(
-            LauncherRunSpec(
-                run_id="run-1",
-                runtime_image="zagent-runtime:local",
-                runtime_workdir="/workspace",
-                model_api_key_env="OPENAI_API_KEY",
-                policy_network="restricted",
-            )
+            create_launcher_run_spec()
         ),
         StubHostEnvironment({"OPENAI_API_KEY"}),
     )
@@ -97,13 +87,7 @@ def test_prepare_run_allows_image_override(tmp_path: Path) -> None:
 def test_prepare_run_requires_host_api_key_env(tmp_path: Path) -> None:
     use_case = PrepareRun(
         StubRunSpecReader(
-            LauncherRunSpec(
-                run_id="run-1",
-                runtime_image="zagent-runtime:local",
-                runtime_workdir="/workspace",
-                model_api_key_env="OPENAI_API_KEY",
-                policy_network="restricted",
-            )
+            create_launcher_run_spec()
         ),
         StubHostEnvironment(set()),
     )
@@ -115,13 +99,7 @@ def test_prepare_run_requires_host_api_key_env(tmp_path: Path) -> None:
 def test_prepare_run_does_not_require_host_api_key_env_for_dry_run(tmp_path: Path) -> None:
     use_case = PrepareRun(
         StubRunSpecReader(
-            LauncherRunSpec(
-                run_id="run-1",
-                runtime_image="zagent-runtime:local",
-                runtime_workdir="/workspace",
-                model_api_key_env="OPENAI_API_KEY",
-                policy_network="restricted",
-            )
+            create_launcher_run_spec()
         ),
         StubHostEnvironment(set()),
     )
@@ -138,13 +116,7 @@ def test_prepare_run_rejects_run_spec_outside_project(tmp_path: Path) -> None:
     outside = tmp_path.parent / "outside-run.yaml"
     use_case = PrepareRun(
         StubRunSpecReader(
-            LauncherRunSpec(
-                run_id="run-1",
-                runtime_image="zagent-runtime:local",
-                runtime_workdir="/workspace",
-                model_api_key_env="OPENAI_API_KEY",
-                policy_network="restricted",
-            )
+            create_launcher_run_spec()
         ),
         StubHostEnvironment({"OPENAI_API_KEY"}),
     )
@@ -156,13 +128,7 @@ def test_prepare_run_rejects_run_spec_outside_project(tmp_path: Path) -> None:
 def test_prepare_run_maps_disabled_network_to_docker_none(tmp_path: Path) -> None:
     use_case = PrepareRun(
         StubRunSpecReader(
-            LauncherRunSpec(
-                run_id="run-1",
-                runtime_image="zagent-runtime:local",
-                runtime_workdir="/workspace",
-                model_api_key_env="OPENAI_API_KEY",
-                policy_network="disabled",
-            )
+            create_launcher_run_spec(policy_network="disabled")
         ),
         StubHostEnvironment({"OPENAI_API_KEY"}),
     )

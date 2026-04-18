@@ -29,7 +29,7 @@ model:
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
 tools:
   builtin:
@@ -75,7 +75,7 @@ model:
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
 tools: {}
 policy: {}

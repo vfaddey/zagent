@@ -76,7 +76,7 @@ model:
 agent_env:
   path: .zagent
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: .
   max_turns: 3
 tools:

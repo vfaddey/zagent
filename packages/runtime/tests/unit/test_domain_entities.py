@@ -24,7 +24,7 @@ def test_runtime_run_spec_entity_can_be_composed() -> None:
             api_base="https://api.openai.com/v1",
         ),
         agent_env=AgentEnvRef(path="/workspace/.zagent"),
-        runtime=RuntimeSpec(image="zagent-runtime:local", workdir="/workspace"),
+        runtime=RuntimeSpec(image="ghcr.io/vfaddey/zagent-runtime:latest", workdir="/workspace"),
         tools=ToolsConfig(builtin=("shell", "files", "apply_patch")),
         policy=PolicySpec(writable_paths=("/workspace",)),
     )

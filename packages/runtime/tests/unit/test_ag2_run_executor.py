@@ -5,26 +5,20 @@ from pathlib import Path
 from typing import Any
 
 from zagent_runtime.application.dto.prompt_context import PromptContext
-from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
+from zagent_runtime.application.dto.runtime_context import RuntimePaths
 from zagent_runtime.application.use_cases.create_agent import AgentSession
 from zagent_runtime.application.use_cases.register_tools import RegisteredTools
-from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
-from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.observability import ChatMessage, RunEvent
-from zagent_runtime.domain.policy import PolicySpec
 from zagent_runtime.domain.run import (
     ResultStatus,
-    RunMode,
-    RunSpec,
     RunState,
-    RuntimeSpec,
-    ToolsConfig,
 )
-from zagent_runtime.domain.task import TaskSpec
 from zagent_runtime.domain.tools import ToolEvent
 from zagent_runtime.infrastructure.ag2.agent_factory import Ag2AgentBundle
 from zagent_runtime.infrastructure.ag2.run_executor import Ag2RunExecutor
 from zagent_runtime.infrastructure.async_bridge import AsyncBridge
+
+from .factories import create_context
 
 
 def test_ag2_run_executor_passes_max_turns_and_adds_final_marker(tmp_path: Path) -> None:
@@ -35,7 +29,7 @@ def test_ag2_run_executor_passes_max_turns_and_adds_final_marker(tmp_path: Path)
         )
     )
     session = _session(executor=executor)
-    context = _context(tmp_path, max_turns=7)
+    context = create_context(tmp_path, max_turns=7)
 
     result = Ag2RunExecutor(AsyncBridge(), NullObserver()).run(context, session)
 
@@ -60,7 +54,7 @@ def test_ag2_run_executor_preserves_existing_final_marker(tmp_path: Path) -> Non
         )
     )
     session = _session(executor=executor)
-    context = _context(tmp_path, max_turns=3)
+    context = create_context(tmp_path, max_turns=3)
 
     result = Ag2RunExecutor(AsyncBridge(), NullObserver()).run(context, session)
 
@@ -77,7 +71,7 @@ def test_ag2_run_executor_closes_mcp_toolkits_and_emits_events(tmp_path: Path) -
     )
     observer = NullObserver()
     session = _session(executor=executor, mcp_toolkits=(mcp_toolkit,))
-    context = _context(tmp_path, max_turns=3)
+    context = create_context(tmp_path, max_turns=3)
 
     Ag2RunExecutor(AsyncBridge(), observer).run(context, session)
 
@@ -175,49 +169,3 @@ def _session(
     )
 
 
-def _context(workspace: Path, max_turns: int) -> RuntimeContext:
-    agent_env_dir = workspace / ".zagent"
-    run_dir = agent_env_dir / "artifacts" / "run-1"
-    run_dir.mkdir(parents=True)
-    return RuntimeContext(
-        run_spec=RunSpec(
-            run_id="run-1",
-            mode=RunMode.FIX,
-            task=TaskSpec(
-                title="Fix",
-                workspace=str(workspace),
-                prompt="Fix bug.",
-            ),
-            model=ModelSpec(
-                provider=ModelProvider.OPENAI_COMPATIBLE,
-                model="gpt-5",
-                api_key_env="OPENAI_API_KEY",
-            ),
-            agent_env=AgentEnvRef(path=str(agent_env_dir)),
-            runtime=RuntimeSpec(
-                image="zagent-runtime:local",
-                workdir=str(workspace),
-                max_turns=max_turns,
-            ),
-            tools=ToolsConfig(),
-            policy=PolicySpec(writable_paths=(str(workspace),)),
-        ),
-        agent_env=AgentEnv(
-            name="test",
-            prompts=PromptFiles(),
-        ),
-        paths=RuntimePaths(
-            run_spec_file=workspace / "run.yaml",
-            workspace=workspace,
-            agent_env_dir=agent_env_dir,
-            artifacts_root_dir=agent_env_dir / "artifacts",
-            run_artifacts_dir=run_dir,
-            state_file=run_dir / "state.json",
-            chat_file=run_dir / "chat.jsonl",
-            ag2_history_file=run_dir / "ag2_history.json",
-            events_file=run_dir / "events.jsonl",
-            tools_file=run_dir / "tools.jsonl",
-            result_file=run_dir / "result.json",
-            summary_file=run_dir / "summary.md",
-        ),
-    )

@@ -33,7 +33,7 @@ model:
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
   max_turns: 40
 tools:
@@ -102,7 +102,7 @@ model:
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
 tools: {}
 policy: {}
@@ -143,7 +143,7 @@ model:
 agent_env:
   path: /workspace/.zagent
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
 tools: {}
 policy: {}
@@ -171,7 +171,7 @@ model:
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
 tools: {}
 policy: {}
@@ -197,7 +197,7 @@ model:
   model: gpt-5
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
 tools: {}
 policy: {}
@@ -226,7 +226,7 @@ model:
 agent_env:
   path: /workspace/.zagent
 runtime:
-  image: zagent-runtime:local
+  image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
   final_marker: DONE
 tools: {}

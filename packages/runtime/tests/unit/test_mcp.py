@@ -6,13 +6,9 @@ from typing import Any
 
 from autogen.tools import Tool
 from zagent_runtime.application.dto.runtime_context import RuntimeContext, RuntimePaths
-from zagent_runtime.domain.agent_env import AgentEnv, AgentEnvRef, PromptFiles
 from zagent_runtime.domain.mcp import McpServerSpec, McpTransport
-from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.observability import ChatMessage, RunEvent
-from zagent_runtime.domain.policy import PolicySpec
-from zagent_runtime.domain.run import RunMode, RunSpec, RunState, RuntimeSpec, ToolsConfig
-from zagent_runtime.domain.task import TaskSpec
+from zagent_runtime.domain.run import RunState
 from zagent_runtime.domain.tools import ToolCallStatus, ToolEvent
 from zagent_runtime.infrastructure.async_bridge import AsyncBridge
 from zagent_runtime.infrastructure.config.loaders import YamlMcpServerLoader
@@ -22,6 +18,8 @@ from zagent_runtime.infrastructure.mcp.client_factory import (
     StreamableHttpSessionConfig,
 )
 from zagent_runtime.infrastructure.mcp.server_spec import resolve_env_mapping
+
+from .factories import create_context
 
 
 def test_yaml_mcp_server_loader_parses_supported_transports(tmp_path: Path) -> None:
@@ -91,7 +89,7 @@ servers:
     executor = object()
 
     handles = adapter.register(
-        context=_context(tmp_path),
+        context=create_context(tmp_path, enable_mcp=True),
         assistant=assistant,
         executor=executor,
     )
@@ -117,7 +115,7 @@ def test_ag2_mcp_tool_adapter_skips_when_mcp_disabled(tmp_path: Path) -> None:
     )
 
     handles = adapter.register(
-        context=_context(tmp_path, enable_mcp=False),
+        context=create_context(tmp_path, enable_mcp=False),
         assistant=object(),
         executor=object(),
     )
@@ -148,7 +146,7 @@ servers:
     )
 
     handles = adapter.register(
-        context=_context(tmp_path),
+        context=create_context(tmp_path, enable_mcp=True),
         assistant=object(),
         executor=object(),
     )
@@ -276,47 +274,3 @@ class TraceObserver:
 
     def on_run_finished(self, paths: RuntimePaths, state: RunState, event: RunEvent) -> None:
         return None
-
-
-def _context(workspace: Path, enable_mcp: bool = True) -> RuntimeContext:
-    agent_env_dir = workspace / ".zagent"
-    run_dir = agent_env_dir / "artifacts" / "run-1"
-    return RuntimeContext(
-        run_spec=RunSpec(
-            run_id="run-1",
-            mode=RunMode.TASK,
-            task=TaskSpec(
-                title="Task",
-                workspace=str(workspace),
-                prompt="Do work.",
-            ),
-            model=ModelSpec(
-                provider=ModelProvider.OPENAI_COMPATIBLE,
-                model="gpt-5",
-                api_key_env="OPENAI_API_KEY",
-            ),
-            agent_env=AgentEnvRef(path=str(agent_env_dir)),
-            runtime=RuntimeSpec(image="zagent-runtime:local", workdir=str(workspace)),
-            tools=ToolsConfig(enable_mcp=enable_mcp),
-            policy=PolicySpec(writable_paths=(str(workspace),)),
-        ),
-        agent_env=AgentEnv(
-            name="test",
-            prompts=PromptFiles(),
-            mcp_servers_file="mcp/servers.yaml",
-        ),
-        paths=RuntimePaths(
-            run_spec_file=workspace / "run.yaml",
-            workspace=workspace,
-            agent_env_dir=agent_env_dir,
-            artifacts_root_dir=agent_env_dir / "artifacts",
-            run_artifacts_dir=run_dir,
-            state_file=run_dir / "state.json",
-            chat_file=run_dir / "chat.jsonl",
-            ag2_history_file=run_dir / "ag2_history.json",
-            events_file=run_dir / "events.jsonl",
-            tools_file=run_dir / "tools.jsonl",
-            result_file=run_dir / "result.json",
-            summary_file=run_dir / "summary.md",
-        ),
-    )

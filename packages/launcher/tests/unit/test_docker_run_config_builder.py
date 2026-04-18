@@ -8,7 +8,7 @@ from zagent_launcher.infrastructure.containers import DockerRunConfigBuilder
 
 def test_docker_run_config_builder_builds_sdk_config(tmp_path: Path) -> None:
     spec = ContainerSpec(
-        image="zagent-runtime:local",
+        image="dummy-image:test",
         command=("run", "--run-spec", "/workspace/.zagent/run.yaml", "--dry-run"),
         workdir="/workspace",
         mounts=(MountSpec(host_path=tmp_path, container_path="/workspace"),),
@@ -18,7 +18,7 @@ def test_docker_run_config_builder_builds_sdk_config(tmp_path: Path) -> None:
 
     config = DockerRunConfigBuilder().build(spec, {"OPENAI_API_KEY": "secret"})
 
-    assert config.image == "zagent-runtime:local"
+    assert config.image == "dummy-image:test"
     assert config.command == ("run", "--run-spec", "/workspace/.zagent/run.yaml", "--dry-run")
     assert config.working_dir == "/workspace"
     assert config.volumes == {

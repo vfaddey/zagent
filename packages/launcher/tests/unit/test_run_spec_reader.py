@@ -15,7 +15,7 @@ run_id: test-run
 model:
   api_key_env: OPENAI_API_KEY
 runtime:
-  image: zagent-runtime:local
+  image: dummy-image:test
   workdir: /workspace
 policy:
   network: disabled
@@ -27,7 +27,7 @@ policy:
 
     assert run_spec.run_id == "test-run"
     assert run_spec.model_api_key_env == "OPENAI_API_KEY"
-    assert run_spec.runtime_image == "zagent-runtime:local"
+    assert run_spec.runtime_image == "dummy-image:test"
     assert run_spec.runtime_workdir == "/workspace"
     assert run_spec.policy_network == "disabled"
     assert run_spec.agent_env_path == "/workspace/.zagent"
