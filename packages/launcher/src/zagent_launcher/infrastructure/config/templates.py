@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from importlib.resources import files
-from pathlib import Path
+from importlib.resources.abc import Traversable
 
 from zagent_launcher.application.errors import ProjectInitError
 from zagent_launcher.application.interfaces import ProjectTemplateProvider
@@ -12,8 +12,8 @@ class BuiltinProjectTemplateProvider(ProjectTemplateProvider):
         template_root = self._template_root(template)
         return tuple(
             sorted(
-                self._relative_path(template_root, path)
-                for path in template_root.rglob("*")
+                relative_path
+                for relative_path, path in self._walk(template_root)
                 if path.is_dir()
             )
         )
@@ -21,18 +21,28 @@ class BuiltinProjectTemplateProvider(ProjectTemplateProvider):
     def files_for(self, template: str) -> dict[str, str]:
         template_root = self._template_root(template)
         return {
-            self._relative_path(template_root, path): path.read_text(encoding="utf-8")
-            for path in sorted(template_root.rglob("*"))
+            relative_path: path.read_text(encoding="utf-8")
+            for relative_path, path in self._walk(template_root)
             if path.is_file() and not path.name.startswith(".")
         }
 
-    def _template_root(self, template: str) -> Path:
+    def _template_root(self, template: str) -> Traversable:
         if template != "basic":
             raise ProjectInitError(f"Unknown project template: {template}")
-        return Path(files("zagent_launcher.infrastructure.config")).joinpath(
+        return files("zagent_launcher.infrastructure.config").joinpath(
             "template_files",
-            template
+            template,
         )
 
-    def _relative_path(self, template_root: Path, path: Path) -> str:
-        return path.relative_to(template_root).as_posix()
+    def _walk(
+        self,
+        root: Traversable,
+        prefix: str = "",
+    ) -> tuple[tuple[str, Traversable], ...]:
+        items: list[tuple[str, Traversable]] = []
+        for entry in sorted(root.iterdir(), key=lambda item: item.name):
+            relative_path = f"{prefix}/{entry.name}" if prefix else entry.name
+            items.append((relative_path, entry))
+            if entry.is_dir():
+                items.extend(self._walk(entry, relative_path))
+        return tuple(items)
