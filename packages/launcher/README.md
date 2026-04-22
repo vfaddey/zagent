@@ -21,7 +21,8 @@ Current implementation:
 - `zagent init` creates the base `.zagent` layout and starter files.
 - Dependencies are wired through Dishka.
 - `zagent run` reads `.zagent/run.yaml`, validates the model API key env var
-  for real runs,
+  for real runs, resolves `runtime.env` variables from the host environment with
+  optional defaults,
   builds Docker SDK run config from `ContainerSpec`, and starts the runtime
   image through docker-py.
 - `zagent run --dry-run` starts the runtime without requiring the model API key

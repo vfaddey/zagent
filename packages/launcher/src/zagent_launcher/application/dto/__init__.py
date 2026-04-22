@@ -12,12 +12,13 @@ from zagent_launcher.application.dto.init_project import (
     WriteFileResult,
     WriteStatus,
 )
-from zagent_launcher.application.dto.run_spec import LauncherRunSpec
+from zagent_launcher.application.dto.run_spec import LauncherRunSpec, LauncherRuntimeEnvVar
 
 __all__ = [
     "InitProjectRequest",
     "InitProjectResult",
     "LauncherRunSpec",
+    "LauncherRuntimeEnvVar",
     "RunResultView",
     "RunStateView",
     "RunTraceLine",

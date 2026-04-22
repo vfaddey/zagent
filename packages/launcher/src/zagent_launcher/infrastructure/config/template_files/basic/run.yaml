@@ -17,6 +17,7 @@ runtime:
   image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
   max_turns: 40
+  env: {}
 
 tools:
   builtin:

@@ -8,14 +8,6 @@ from zagent_launcher.domain import ProjectLayout
 
 
 class InitProject:
-    _DIRECTORIES = (
-        "prompts",
-        "rules",
-        "skills",
-        "mcp",
-        "files",
-    )
-
     def __init__(
         self,
         template_provider: ProjectTemplateProvider,
@@ -27,7 +19,7 @@ class InitProject:
     def __call__(self, request: InitProjectRequest) -> InitProjectResult:
         layout = ProjectLayout.from_root(request.project_root)
         self._writer.ensure_dir(layout.agent_dir)
-        for relative_dir in self._DIRECTORIES:
+        for relative_dir in self._template_provider.directories_for(request.template):
             self._writer.ensure_dir(layout.agent_dir / relative_dir)
 
         created: list[Path] = []

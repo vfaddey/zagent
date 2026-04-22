@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from zagent_launcher.application.dto import LauncherRunSpec
 from zagent_launcher.application.errors import (
     MissingEnvironmentVariableError,
     RunSpecOutsideProjectError,
@@ -21,8 +22,6 @@ class PrepareRun:
         project_root = request.project_root.expanduser().resolve(strict=False)
         run_spec_path = self._resolve_run_spec_path(project_root, request.run_spec)
         run_spec = self._run_spec_reader.read(run_spec_path)
-        if not request.dry_run and not self._host_environment.has(run_spec.model_api_key_env):
-            raise MissingEnvironmentVariableError(run_spec.model_api_key_env)
 
         command = [
             "run",
@@ -45,7 +44,7 @@ class PrepareRun:
             command=tuple(command),
             workdir=run_spec.runtime_workdir,
             mounts=(MountSpec(host_path=mount_host_path, container_path=self._WORKSPACE_MOUNT),),
-            env=(run_spec.model_api_key_env,),
+            env=self._container_env(run_spec, request.dry_run),
             network=self._docker_network(run_spec.policy_network),
         )
 
@@ -66,3 +65,27 @@ class PrepareRun:
         if policy_network == "disabled":
             return "none"
         return None
+
+    def _container_env(self, run_spec: LauncherRunSpec, dry_run: bool) -> dict[str, str]:
+        env = {
+            spec.name: self._required_env(spec.name, default=spec.default)
+            for spec in run_spec.runtime_env
+        }
+        model_api_key = run_spec.model_api_key_env
+        if model_api_key in env:
+            return env
+        if dry_run:
+            model_value = self._host_environment.get(model_api_key)
+            if model_value is not None:
+                env[model_api_key] = model_value
+            return env
+        env[model_api_key] = self._required_env(model_api_key)
+        return env
+
+    def _required_env(self, name: str, default: str | None = None) -> str:
+        value = self._host_environment.get(name)
+        if value is not None:
+            return value
+        if default is not None:
+            return default
+        raise MissingEnvironmentVariableError(name)

@@ -17,6 +17,9 @@ model:
 runtime:
   image: dummy-image:test
   workdir: /workspace
+  env:
+    API_BASE:
+      default: http://localhost:11434/v1
 policy:
   network: disabled
 """.lstrip(),
@@ -31,6 +34,9 @@ policy:
     assert run_spec.runtime_workdir == "/workspace"
     assert run_spec.policy_network == "disabled"
     assert run_spec.agent_env_path == "/workspace/.zagent"
+    assert len(run_spec.runtime_env) == 1
+    assert run_spec.runtime_env[0].name == "API_BASE"
+    assert run_spec.runtime_env[0].default == "http://localhost:11434/v1"
 
 
 def test_yaml_run_spec_reader_requires_file(tmp_path: Path) -> None:

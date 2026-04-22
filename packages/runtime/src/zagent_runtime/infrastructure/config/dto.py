@@ -8,7 +8,7 @@ from zagent_runtime.domain.agent_env import AgentEnvRef
 from zagent_runtime.domain.mcp import McpServersConfig, McpServerSpec, McpTransport
 from zagent_runtime.domain.model import ModelProvider, ModelSpec
 from zagent_runtime.domain.policy import NetworkPolicy, PolicySpec
-from zagent_runtime.domain.run import RunMode, RunSpec, RuntimeSpec, ToolsConfig
+from zagent_runtime.domain.run import RunMode, RunSpec, RuntimeEnvVar, RuntimeSpec, ToolsConfig
 from zagent_runtime.domain.task import TaskSpec
 
 
@@ -64,16 +64,25 @@ class AgentEnvRefConfig(StrictConfigModel):
         return AgentEnvRef(path=self.path)
 
 
+class RuntimeEnvVarConfig(StrictConfigModel):
+    default: str | None = None
+
+
 class RuntimeConfig(StrictConfigModel):
     image: str
     workdir: str
     max_turns: int = Field(default=20, ge=1, le=100)
+    env: dict[str, RuntimeEnvVarConfig] = Field(default_factory=dict)
 
     def to_domain(self) -> RuntimeSpec:
         return RuntimeSpec(
             image=self.image,
             workdir=self.workdir,
             max_turns=self.max_turns,
+            env=tuple(
+                RuntimeEnvVar(name=name, default=config.default)
+                for name, config in self.env.items()
+            ),
         )
 
 

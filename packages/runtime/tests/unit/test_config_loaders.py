@@ -36,6 +36,9 @@ runtime:
   image: ghcr.io/vfaddey/zagent-runtime:latest
   workdir: /workspace
   max_turns: 40
+  env:
+    API_BASE:
+      default: http://localhost:11434/v1
 tools:
   builtin:
     - shell
@@ -51,6 +54,9 @@ policy: {}
     assert run_spec.mode is RunMode.FIX
     assert run_spec.model.provider is ModelProvider.OPENAI_COMPATIBLE
     assert run_spec.runtime.max_turns == 40
+    assert len(run_spec.runtime.env) == 1
+    assert run_spec.runtime.env[0].name == "API_BASE"
+    assert run_spec.runtime.env[0].default == "http://localhost:11434/v1"
     assert run_spec.runtime.final_marker == "ZAGENT_DONE"
     assert run_spec.task.prompt_file == "prompts/task.md"
     assert run_spec.tools.builtin == ("shell", "files")

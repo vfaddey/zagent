@@ -12,11 +12,11 @@ def test_docker_run_config_builder_builds_sdk_config(tmp_path: Path) -> None:
         command=("run", "--run-spec", "/workspace/.zagent/run.yaml", "--dry-run"),
         workdir="/workspace",
         mounts=(MountSpec(host_path=tmp_path, container_path="/workspace"),),
-        env=("OPENAI_API_KEY",),
+        env={"OPENAI_API_KEY": "secret"},
         network="none",
     )
 
-    config = DockerRunConfigBuilder().build(spec, {"OPENAI_API_KEY": "secret"})
+    config = DockerRunConfigBuilder().build(spec)
 
     assert config.image == "dummy-image:test"
     assert config.command == ("run", "--run-spec", "/workspace/.zagent/run.yaml", "--dry-run")
@@ -38,6 +38,6 @@ def test_docker_run_config_builder_marks_read_only_mounts(tmp_path: Path) -> Non
         mounts=(MountSpec(host_path=tmp_path, container_path="/workspace", read_only=True),),
     )
 
-    config = DockerRunConfigBuilder().build(spec, {})
+    config = DockerRunConfigBuilder().build(spec)
 
     assert config.volumes[str(tmp_path)]["mode"] == "ro"

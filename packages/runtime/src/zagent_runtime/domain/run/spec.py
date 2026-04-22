@@ -14,8 +14,6 @@ FINAL_MARKER = "ZAGENT_DONE"
 
 
 class RunMode(StrEnum):
-    """Supported runtime execution modes."""
-
     FIX = "fix"
     RESEARCH = "research"
     TASK = "task"
@@ -28,10 +26,17 @@ class RuntimeSpec:
     image: str
     workdir: str
     max_turns: int = 20
+    env: tuple[RuntimeEnvVar, ...] = field(default_factory=tuple)
 
     @property
     def final_marker(self) -> str:
         return FINAL_MARKER
+
+
+@dataclass(frozen=True, slots=True)
+class RuntimeEnvVar:
+    name: str
+    default: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

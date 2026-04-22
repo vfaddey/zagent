@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+
+@dataclass(frozen=True, slots=True)
+class LauncherRuntimeEnvVar:
+    name: str
+    default: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -11,3 +17,4 @@ class LauncherRunSpec:
     model_api_key_env: str
     policy_network: str
     agent_env_path: str = "/workspace/.zagent"
+    runtime_env: tuple[LauncherRuntimeEnvVar, ...] = field(default_factory=tuple)

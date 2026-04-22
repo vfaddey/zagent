@@ -60,9 +60,7 @@ class FakeDockerClientFactory(DockerClientFactory):
 
 
 def test_docker_sdk_runner_runs_container_and_streams_logs(
-    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("OPENAI_API_KEY", "secret")
     container = FakeContainer(status_code=7)
     client = FakeDockerClient(container)
     output = BytesIO()
@@ -76,7 +74,7 @@ def test_docker_sdk_runner_runs_container_and_streams_logs(
         ContainerSpec(
             image="image",
             command=("run", "--run-spec", "/workspace/.zagent/run.yaml"),
-            env=("OPENAI_API_KEY",),
+            env={"OPENAI_API_KEY": "secret"},
         )
     )
 

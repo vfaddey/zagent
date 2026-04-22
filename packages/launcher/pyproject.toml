@@ -25,3 +25,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zagent_launcher"]
+include = [
+    "src/zagent_launcher/infrastructure/config/template_files/**/.gitkeep",
+    "src/zagent_launcher/infrastructure/config/template_files/**/*.md",
+    "src/zagent_launcher/infrastructure/config/template_files/**/*.yaml",
+]

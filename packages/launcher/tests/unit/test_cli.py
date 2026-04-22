@@ -22,12 +22,20 @@ def test_init_creates_basic_zagent_layout(tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert (tmp_path / ".zagent/run.yaml").is_file()
+    assert (tmp_path / ".zagent/artifacts").is_dir()
     assert (tmp_path / ".zagent/prompts/system.md").is_file()
+    assert (tmp_path / ".zagent/prompts/developer.md").is_file()
     assert (tmp_path / ".zagent/prompts/task.md").is_file()
     assert (tmp_path / ".zagent/rules/global.md").is_file()
     assert (tmp_path / ".zagent/skills").is_dir()
+    assert (tmp_path / ".zagent/skills/local").is_dir()
+    assert (tmp_path / ".zagent/skills/example.md").is_file()
     assert (tmp_path / ".zagent/mcp").is_dir()
+    assert (tmp_path / ".zagent/mcp/servers.yaml").is_file()
     assert (tmp_path / ".zagent/files").is_dir()
+    assert (tmp_path / ".zagent/files/project").is_dir()
+    assert (tmp_path / ".zagent/files/project/overview.md").is_file()
+    assert (tmp_path / ".zagent/files/specs").is_dir()
 
 
 def test_init_skips_existing_files_without_force(tmp_path: Path) -> None:

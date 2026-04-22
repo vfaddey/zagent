@@ -5,10 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from yaml import YAMLError
 
-from zagent_launcher.application.dto import LauncherRunSpec
+from zagent_launcher.application.dto import LauncherRunSpec, LauncherRuntimeEnvVar
 from zagent_launcher.application.errors import RunSpecNotFoundError, RunSpecParseError
 from zagent_launcher.application.interfaces import RunSpecReader
 
@@ -24,6 +24,11 @@ class _ModelConfig(_StrictModel):
 class _RuntimeConfig(_StrictModel):
     image: str
     workdir: str = "/workspace"
+    env: dict[str, _RuntimeEnvConfig] = Field(default_factory=dict)
+
+
+class _RuntimeEnvConfig(_StrictModel):
+    default: str | None = None
 
 
 class _AgentEnvConfig(_StrictModel):
@@ -49,6 +54,10 @@ class _RunSpecConfig(_StrictModel):
             model_api_key_env=self.model.api_key_env,
             policy_network=self.policy.network,
             agent_env_path=self.agent_env.path,
+            runtime_env=tuple(
+                LauncherRuntimeEnvVar(name=name, default=config.default)
+                for name, config in self.runtime.env.items()
+            ),
         )
 
 

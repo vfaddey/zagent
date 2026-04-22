@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from typing import Any, BinaryIO
 
@@ -33,7 +32,7 @@ class DockerSdkRunner(ContainerRunner):
         self._output = output or sys.stdout.buffer
 
     def run(self, spec: ContainerSpec) -> LaunchResult:
-        run_config = self._run_config_builder.build(spec, os.environ)
+        run_config = self._run_config_builder.build(spec)
         client = self._client_factory.create()
         container: Any | None = None
         try:
