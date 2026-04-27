@@ -1,0 +1,55 @@
+site_name: ZAgent
+site_description: CLI and runtime for running AI agents in isolated Docker containers
+repo_url: https://github.com/vfaddey/zagent
+repo_name: vfaddey/zagent
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Architecture:
+    - Core Architecture: architecture.md
+    - Launcher CLI: launcher.md
+    - Detailed Design: agent_project_architecture.md
+  - Concepts & Configuration:
+    - Agent Environment: agent-env.md
+    - Run Specification: run-spec.md
+    - Project Structure: project-structure.md
+  - Advanced:
+    - Model Context Protocol (MCP): mcp.md
+    - Plugin System: plugin-system.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - toc:
+      permalink: true
